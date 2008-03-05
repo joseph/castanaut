@@ -7,8 +7,6 @@ module Castanaut
     # Runs the "screenplay", which is a file containing Castanaut instructions.
     #
     def initialize(screenplay)
-      perms_test
-
       if !screenplay || !File.exists?(screenplay)
         raise Castanaut::Exceptions::ScreenplayNotFound 
       end
@@ -94,7 +92,8 @@ module Castanaut
       @cursor_loc ||= {}
       @cursor_loc[:x] = options[:to][:left]
       @cursor_loc[:y] = options[:to][:top]
-      automatically "mousemove #{@cursor_loc[:x]} #{@cursor_loc[:y]}"
+      
+      compatible_call :cursor, @cursor_loc
     end
 
     alias :move :cursor
@@ -102,32 +101,32 @@ module Castanaut
     # Send a mouse-click at the current mouse location.
     #
     def click(btn = 'left')
-      automatically "mouseclick #{mouse_button_translate(btn)}"
+      compatible_call :click, btn
     end
 
     # Send a double-click at the current mouse location.
     #
     def doubleclick(btn = 'left')
-      automatically "mousedoubleclick #{mouse_button_translate(btn)}"
+      compatible_call :doubleclick, btn
     end
     
     # Send a triple-click at the current mouse location.
     # 
     def tripleclick(btn = 'left')
-      automatically "mousetripleclick #{mouse_button_translate(btn)}"
+      compatible_call :doubleclick, btn
     end
 
     # Press the button down at the current mouse location. Does not 
     # release the button until the mouseup method is invoked.
     #
     def mousedown(btn = 'left')
-      automatically "mousedown #{mouse_button_translate(btn)}"
+      compatible_call :mousedown, btn
     end
 
     # Releases the mouse button pressed by a previous mousedown.
     #
     def mouseup(btn = 'left')
-      automatically "mouseup #{mouse_button_translate(btn)}"
+      compatible_call :mouseup, btn
     end
 
     # "Drags" the mouse by (effectively) issuing a mousedown at the current 
@@ -135,22 +134,20 @@ module Castanaut
     # issuing a mouseup.
     #
     def drag(*options)
-      options = combine_options(*options)
-      apply_offset(options)
-      automatically "mousedrag #{options[:to][:left]} #{options[:to][:top]}"
+      compatible_call :drag, *options
     end
 
     # Sends the characters into the active control in the active window.
     #
-    def type(str)
-      automatically "type #{str}"
+    def type(str, opts = {})
+      compatible_call :type, str, opts
     end
 
     # Sends the keycode (a hex value) to the active control in the active 
     # window. For more about keycode values, see Mac Developer documentation.
     #
     def hit(key)
-      automatically "hit #{key}"
+      compatible_call :hit, key
     end
 
     # Don't do anything for the specified number of seconds (can be portions
@@ -271,7 +268,17 @@ module Castanaut
 
       @cached_scripts[filename]
     end
-
+    
+    # Runs a script from a string.
+    # Returns the result.
+    #
+    def execute_applescript(scpt)
+      File.open(FILE_APPLESCRIPT, 'w') {|f| f.write(scpt)}
+      result = run("osascript #{FILE_APPLESCRIPT}")
+      File.unlink(FILE_APPLESCRIPT)
+      result
+    end
+    
     # This stage direction is slightly different to the other ones. It collects
     # a set of directions to be executed when the movie ends, or when it is
     # aborted by the user. Mostly, it's used for cleaning up stuff. Here's
@@ -292,17 +299,22 @@ module Castanaut
       @end_credits ||= []
       @end_credits << blk
     end
-
+    
     protected
-      def execute_applescript(scpt)
-        File.open(FILE_APPLESCRIPT, 'w') {|f| f.write(scpt)}
-        result = run("osascript #{FILE_APPLESCRIPT}")
-        File.unlink(FILE_APPLESCRIPT)
-        result
+      def compatible_call(method, *options)
+        compatibility_version.send(method, *options)
+      rescue NameError
+        raise "Sorry, #{compatibility_version.to_s} doesn't support the \"#{method}\" action"
       end
-
-      def automatically(cmd)
-        run("#{osxautomation_path} \"#{cmd}\"")
+      
+      def compatibility_version
+        @compatibility_version ||= case run("/usr/bin/sw_vers -productVersion")
+        when /10\.4\.\d+/
+          Castanaut::Compatibility::Tiger.new(self)
+        else
+          Castanaut::Compatibility::Leopard.new(self)
+        end
+        @compatibility_version
       end
 
       def escape_dq(str)
@@ -314,34 +326,10 @@ module Castanaut
       end
 
     private
-      def osxautomation_path
-        File.join(PATH, "cbin", "osxautomation")
-      end
-
-      def perms_test
-        return if File.executable?(osxautomation_path)
-        puts "IMPORTANT: Castanaut has recently been installed or updated. " +
-          "You need to give it the right to control mouse and keyboard " +
-          "input during screenplays."
-
-        run("sudo chmod a+x #{osxautomation_path}")
-
-        if File.executable?(osxautomation_path)
-          puts "Permission granted. Thanks."
-        else
-          raise Castanaut::Exceptions::OSXAutomationPermissionError
-        end
-      end
-
       def apply_offset(options)
         return unless options[:to] && options[:offset]
         options[:to][:left] += options[:offset][:x] || 0
         options[:to][:top] += options[:offset][:y] || 0
-      end
-
-      def mouse_button_translate(btn)
-        return btn if btn.is_a?(Integer)
-        {"left" => 1, "right" => 2, "middle" => 3}[btn]
       end
 
       def roll_credits

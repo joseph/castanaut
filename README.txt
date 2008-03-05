@@ -134,11 +134,18 @@ your own.
 
 * Mac OS X 10.5
 
+or
+
+* Mac OS X 10.4
+* The XTool scripting additions <http://osaxen.com/files/xtool1.1.html>
+
 == INSTALL:
 
 Run the following command to install Castanaut
 
   sudo gem install castanaut
+
+If you're using Mac OS X 10.4 (Tiger) you will also need to download and install the XTool scripting additions.
 
 Once installed, you should run the following command for two reasons:
 
