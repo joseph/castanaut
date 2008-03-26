@@ -21,19 +21,19 @@ module Castanaut; module Compatibility
       automatically "mouseclick #{mouse_button_translate(btn)}"
     end
     
-    def doubleclick(btn = 'left')
+    def doubleclick(btn)
       automatically "mousedoubleclick #{mouse_button_translate(btn)}"
     end
     
-    def tripleclick(btn = 'left')
+    def tripleclick(btn)
       automatically "mousetripleclick #{mouse_button_translate(btn)}"
     end
     
-    def mousedown(btn = 'left')
+    def mousedown(btn)
       automatically "mousedown #{mouse_button_translate(btn)}"
     end
     
-    def mouseup(btn = 'left')
+    def mouseup(btn)
       automatically "mouseup #{mouse_button_translate(btn)}"
     end
     
@@ -43,11 +43,13 @@ module Castanaut; module Compatibility
       automatically "mousedrag #{options[:to][:left]} #{options[:to][:top]}"
     end
     
-    def type(str)
+    def type(str, opts)
+      puts "Warning: #{this.to_s} does not support additional options for the 'type' method." unless opts.keys.empty?
       automatically "type #{str}"
     end
     
-    def hit(key)
+    def hit(key, *modifiers)
+      puts "Warning: #{this.to_s} does not support modifier keys for the 'hit' method." unless modifiers.empty?
       automatically "hit #{key}"
     end
     

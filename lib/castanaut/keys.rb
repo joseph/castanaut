@@ -14,7 +14,8 @@ module Castanaut
   CapsLock      = "0x39"
   Alt           = "0x3A"
   Ctrl          = "0x3B"
-
+  Command       = "0x37"
+  
   LArrow        = "0x7B"
   RArrow        = "0x7C"
   DArrow        = "0x7D"
@@ -39,5 +40,5 @@ module Castanaut
   F10           = "0x6D"
   F11           = "0x67"
   F12           = "0x6F"
-
+  
 end

@@ -137,7 +137,7 @@ your own.
 or
 
 * Mac OS X 10.4
-* The XTool scripting additions <http://osaxen.com/files/xtool1.1.html>
+* The Extras Suite application <http://www.kanzu.com/main.html#extrasuites>
 
 == INSTALL:
 

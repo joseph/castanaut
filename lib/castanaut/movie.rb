@@ -139,6 +139,9 @@ module Castanaut
 
     # Sends the characters into the active control in the active window.
     #
+    # If the options hash is given, it can contain the following options:
+    # :speed: The number of characters per second to type (more or less). A speed of nil or 0 types as quickly as possible. (default - nil)
+    #
     def type(str, opts = {})
       compatible_call :type, str, opts
     end
@@ -146,8 +149,10 @@ module Castanaut
     # Sends the keycode (a hex value) to the active control in the active 
     # window. For more about keycode values, see Mac Developer documentation.
     #
-    def hit(key)
-      compatible_call :hit, key
+    # Also accepts one or more of the following modifiers as options: Command, Ctrl, Alt, Shift
+    #
+    def hit(key, *modifiers)
+      compatible_call :hit, key, *modifiers
     end
 
     # Don't do anything for the specified number of seconds (can be portions
