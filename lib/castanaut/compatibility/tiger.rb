@@ -2,12 +2,7 @@ module Castanaut; module Compatibility
   require "bigdecimal"
   require "bigdecimal/math"
   
-  class Tiger
-    
-    def initialize(movie)
-      raise ArgumentError.new("First argument must be a Castanaut::Movie") unless movie.is_a?(Castanaut::Movie)
-      @movie = movie
-    end
+  class Tiger < MacOSX
     
     def to_s
       "Mac OS 10.4 (Tiger)"

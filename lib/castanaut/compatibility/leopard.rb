@@ -1,10 +1,9 @@
 module Castanaut; module Compatibility
   
-  class Leopard
+  class Leopard < MacOSX
     
     def initialize(movie)
-      raise ArgumentError.new("First argument must be a Castanaut::Movie") unless movie.is_a?(Castanaut::Movie)
-      @movie = movie
+      super(movie)
       
       perms_test
     end
