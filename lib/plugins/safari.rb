@@ -5,6 +5,18 @@ module Castanaut
     # Safari 3 on Mac OS X 10.5.2.
     module Safari
 
+      # An applescript fragment by the Movie launch method to determine
+      # whether a Safari browser window is open or not.
+      def ensure_window_for_safari
+        "if (count(windows)) < 1 then make new document"
+      end
+
+      # An applescript fragment by the Movie launch method to position
+      # the window.
+      def positioning_for_safari
+        nil
+      end
+
       # Open a URL in the front Safari tab.
       def url(str)
         execute_applescript(%Q`

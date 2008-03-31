@@ -2,6 +2,9 @@ module Castanaut
   # The movie class is the containing context within which screenplays are 
   # invoked. It provides a number of basic stage directions for your 
   # screenplays, and can be extended with plugins.
+  #
+  # If you're working to make Castanaut compatible with your operating system,
+  # you must make sure that *all* methods in this class work correctly.
   class Movie
 
     # Runs the "screenplay", which is a file containing Castanaut instructions.
@@ -48,43 +51,38 @@ module Castanaut
     end
 
     # Launch the application matching the string given in the first argument.
-    # (This resolution is handled by Applescript.)
     #
     # If the options hash is given, it should contain the co-ordinates for
-    # the window (top, left, width, height). The to method will format these
+    # the window (top, left, width, height). The the method will format these
     # co-ordinates appropriately.
+    #
+    # e.g. launch "Firefox", at(10, 10, 800, 600)
     #
     def launch(app_name, *options)
       options = combine_options(*options)
+      
+      compatible_call :launch, app_name, options
+    end
 
-      ensure_window = ""
-      case app_name.downcase
-        when "safari"
-          ensure_window = "if (count(windows)) < 1 then make new document"
-      end
+    # Returns a region hash describing the entire screen area.
+    #
+    # Expects compatible_call to return a hash with :width & :heigt keys.
+    #
+    def screen_size
+      compatible_call :screen_size
+    end
 
-      positioning = ""
-      if options[:to]
-        pos = "#{options[:to][:left]}, #{options[:to][:top]}"
-        dims = "#{options[:to][:left] + options[:to][:width]}, " +
-          "#{options[:to][:top] + options[:to][:height]}"
-        if options[:to][:width]
-          positioning = "set bounds of front window to {#{pos}, #{dims}}"
-        else
-          positioning = "set position of front window to {#{pos}}"
-        end
-      end
-
-      execute_applescript(%Q`
-        tell application "#{app_name}"
-          activate
-          #{ensure_window}
-          #{positioning}
-        end tell
-      `)
+    # Get a hash representing the current mouse cursor co-ordinates.
+    #
+    # Expects compatible_call to return a hash with :x & :y keys.
+    #
+    def cursor_location
+      compatible_call :cursor_location
     end
 
     # Move the mouse cursor to the specified co-ordinates.
+    #
+    # e.g. cursor to(20, 20)
     #
     def cursor(*options)
       options = combine_options(*options)
@@ -139,18 +137,22 @@ module Castanaut
 
     # Sends the characters into the active control in the active window.
     #
-    # If the options hash is given, it can contain the following options:
-    # :speed: The number of characters per second to type (more or less). A speed of nil or 0 types as quickly as possible. (default - nil)
+    # Options include:
+    # * :speed - The number of characters per second to type (more or less).
+    #   A speed of 0 types as quickly as possible. (default - 50)
     #
     def type(str, opts = {})
+      opts[:speed] = 50 unless opts[:speed].nil?
+      
       compatible_call :type, str, opts
     end
 
-    # Sends the keycode (a hex value) to the active control in the active 
-    # window. For more about keycode values, see Mac Developer documentation.
+    # Hit a single key on the keyboard (with optional modifiers).
+    # Valid keys include any single character or any of the constants in keys.rb
+    # Valid modifiers include one or more of the following: Command, Ctrl, Alt, Shift
     #
-    # Also accepts one or more of the following modifiers as options: Command, Ctrl, Alt, Shift
-    #
+    # e.g. hit Castanaut::Tab
+    #      hit 'a', Castanaut::Command
     def hit(key, *modifiers)
       compatible_call :hit, key, *modifiers
     end
@@ -162,11 +164,11 @@ module Castanaut
       sleep seconds
     end
 
-    # Use Leopard's native text-to-speech functionality to emulate a human
+    # Use text-to-speech functionality to emulate a human
     # voice saying the narrative text.
     #
     def say(narrative)
-      run(%Q`say "#{escape_dq(narrative)}"`)
+      compatible_call :say, narrative
     end
 
     # Starts saying the narrative text, and simultaneously begins executing
@@ -203,10 +205,7 @@ module Castanaut
     # current mouse location.
     #
     def by(x, y)
-      unless @cursor_loc
-        @cursor_loc = automatically("mouselocation").strip.split(' ')
-        @cursor_loc = {:x => @cursor_loc[0].to_i, :y => @cursor_loc[1].to_i}
-      end
+      @cursor_loc ||= cursor_location
       to(@cursor_loc[:x] + x, @cursor_loc[:y] + y)
     end
 
@@ -217,41 +216,13 @@ module Castanaut
       { :offset => { :x => x, :y => y } }
     end
 
-
-    # Returns a region hash describing the entire screen area. (May be wonky
-    # for multi-monitor set-ups.)
-    #
-    def screen_size
-      coords = execute_applescript(%Q`
-        tell application "Finder"
-            get bounds of window of desktop
-        end tell
-      `)
-      coords = coords.split(", ").collect {|c| c.to_i}
-      to(*coords)
-    end
-
     # Runs a shell command, performing fairly naive (but effective!) exit 
     # status handling. Returns the stdout result of the command.
     #
     def run(cmd)
-      #puts("Executing: #{cmd}")
       result = `#{cmd}`
       raise Castanaut::Exceptions::ExternalActionError if $?.exitstatus > 0
       result
-    end
-  
-    # Adds custom methods to this movie instance, allowing you to perform
-    # additional actions. See the README.txt for more information.
-    #
-    def plugin(str)
-      str.downcase!
-      begin
-        require File.join(File.dirname(@screenplay_path),"plugins","#{str}.rb")
-      rescue LoadError
-        require File.join(LIBPATH, "plugins", "#{str}.rb")
-      end
-      extend eval("Castanaut::Plugin::#{str.capitalize}")
     end
 
     # Loads a script from a file into a string, looking first in the
@@ -273,15 +244,18 @@ module Castanaut
 
       @cached_scripts[filename]
     end
-    
-    # Runs a script from a string.
-    # Returns the result.
+
+    # Adds custom methods to this movie instance, allowing you to perform
+    # additional actions. See the README.txt for more information.
     #
-    def execute_applescript(scpt)
-      File.open(FILE_APPLESCRIPT, 'w') {|f| f.write(scpt)}
-      result = run("osascript #{FILE_APPLESCRIPT}")
-      File.unlink(FILE_APPLESCRIPT)
-      result
+    def plugin(str)
+      str.downcase!
+      begin
+        require File.join(File.dirname(@screenplay_path),"plugins","#{str}.rb")
+      rescue LoadError
+        require File.join(LIBPATH, "plugins", "#{str}.rb")
+      end
+      extend eval("Castanaut::Plugin::#{str.capitalize}")
     end
     
     # This stage direction is slightly different to the other ones. It collects
@@ -306,28 +280,50 @@ module Castanaut
     end
     
     protected
-      def compatible_call(method, *options)
-        compatibility_version.send(method, *options)
-      rescue NameError
-        raise "Sorry, #{compatibility_version.to_s} doesn't support the \"#{method}\" action"
-      end
-      
+      # Returns an instance of the compatibility layer for the current
+      # operating system.
+      #
+      # If you're working to make Castanaut compatible with your operating system,
+      # make sure your operating system can be correctly identified here. 
+      #
       def compatibility_version
         @compatibility_version ||= case run("/usr/bin/sw_vers -productVersion")
         when /10\.4\.\d+/
-          Castanaut::Compatibility::Tiger.new(self)
+          Castanaut::Compatibility::MacOsXTiger.new(self)
         else
-          Castanaut::Compatibility::Leopard.new(self)
+          Castanaut::Compatibility::MacOsXLeopard.new(self)
         end
         @compatibility_version
       end
+      
+      # The break & butter of Castanaut's cross-OS compatibility.
+      #
+      def compatible_call(method, *options)
+        compatibility_version.send(method, *options)
+      rescue NameError
+        raise "Sorry, #{compatibility_version.to_s} doesn't support the \"#{method}\" action\n"
+      end
 
+      # A method used by the compatibility layer to display runtime messages
+      # explaining which requested options are not supported by the current
+      # operating system.
+      #
+      # e.g. If the movie script calls "hit 'a', Castanaut::Command"
+      #      "Warning: Mac OS 10.5 (Leopard) doesn't support modifier keys
+      #      for the 'hit' method." will be displayed for Mac OS 10.5 users.
+      #
+      def not_supported(message)
+        puts "Warning: #{ compatibility_version.to_s } doesn't support #{ message.gsub(/\.$/, '') }."
+      end
+
+      # Escapes double quotes.
+      #
       def escape_dq(str)
         str.gsub(/\\/,'\\\\\\').gsub(/"/, '\"')
       end
 
       def combine_options(*args)
-        options = args.inject({}) { |result, option| result.update(option) }
+        args.inject({}) { |result, option| result.update(option) }
       end
 
     private
@@ -340,6 +336,14 @@ module Castanaut
       def roll_credits
         return unless @end_credits && @end_credits.any?
         @end_credits.each {|credit| credit.call}
+      end
+      
+      # If a method isn't defined in the movie class, try doing a compatible_call.
+      # This is the magic that allows methods like the execute_applescript to work
+      # on Mac OS systems.
+      #
+      def method_missing(*args)
+        compatible_call *args
       end
       
   end

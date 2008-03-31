@@ -1,11 +1,19 @@
 module Castanaut; module Compatibility
   
-  class Leopard
+  class MacOsXLeopard < MacOsX
+    # The MacOsXLeopard class is intended to work on machines running 
+    # Mac OS X 10.5.x
+    #
+    # Known limitations:
+    #  Partially working:
+    #   * type does not support the :speed option
+    #   * hit only works with special keys (those in keys.rb) not
+    #     other characters (like 'a')
+    #   * hit does not support modifier keys
+    #
     
     def initialize(movie)
-      raise ArgumentError.new("First argument must be a Castanaut::Movie") unless movie.is_a?(Castanaut::Movie)
-      @movie = movie
-      
+      super(movie)
       perms_test
     end
     
@@ -17,6 +25,11 @@ module Castanaut; module Compatibility
       automatically "mousemove #{dst_loc[:x]} #{dst_loc[:y]}"
     end
     
+    def cursor_location
+      loc = automatically("mouselocation").strip.split(' ')
+      {:x => loc[0].to_i, :y => loc[1].to_i}
+    end
+
     def click(btn)
       automatically "mouseclick #{mouse_button_translate(btn)}"
     end
@@ -44,12 +57,12 @@ module Castanaut; module Compatibility
     end
     
     def type(str, opts)
-      puts "Warning: #{this.to_s} does not support additional options for the 'type' method." unless opts.keys.empty?
+      not_supported "additional options for the 'type' method" unless opts.keys.empty?
       automatically "type #{str}"
     end
     
     def hit(key, *modifiers)
-      puts "Warning: #{this.to_s} does not support modifier keys for the 'hit' method." unless modifiers.empty?
+      not_supported "modifier keys for the 'hit' method" unless modifiers.empty?
       automatically "hit #{key}"
     end
     
@@ -59,10 +72,6 @@ module Castanaut; module Compatibility
     end
     
   private
-    def movie
-      
-    end
-  
     def perms_test
       return if File.executable?(osxautomation_path)
       puts "IMPORTANT: Castanaut has recently been installed or updated. " +

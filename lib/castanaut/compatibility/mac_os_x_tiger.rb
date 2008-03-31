@@ -2,18 +2,28 @@ module Castanaut; module Compatibility
   require "bigdecimal"
   require "bigdecimal/math"
   
-  class Tiger < MacOSX
-    def initialize(movie)
-      raise ArgumentError.new("First argument must be a Castanaut::Movie") unless movie.is_a?(Castanaut::Movie)
-      @movie = movie
-    end
+  class MacOsXTiger < MacOsX
+    # The MacOsXTiger class is intended to work on machines running 
+    # Mac OS X 10.4.x  In order for this compatibility layer to work
+    # correctly, the Extras Suites application must be installed.
+    # Get it at <http://www.kanzu.com/main.html#extrasuites>
+    #
+    # Known limitations:
+    #  Not working:
+    #   * mousedown
+    #   * mouseup
+    #   * drag
+    #  Partially working:
+    #   * the click methods only work with left-clicks
+    #   * mousedown
+    #
     
     def to_s
       "Mac OS 10.4 (Tiger)"
     end
     
     def cursor(dst_loc)
-      start_arr ||= movie.execute_applescript("mouse location").to_s.split(',').collect{|p| p.to_s.to_i}
+      start_arr ||= execute_applescript("mouse location").to_s.split(',').collect{|p| p.to_s.to_i}
       start_loc = {:x=>start_arr[0], :y=>start_arr[1]}
       dist = {
         :x=>(start_loc[:x] - dst_loc[:x]),
@@ -23,7 +33,7 @@ module Castanaut; module Compatibility
       
       dist = {:x=>dist[:x] / BigDecimal.new(steps.to_s), :y=>dist[:y] / BigDecimal.new(steps.to_s)}
       
-      movie.execute_applescript(%Q`
+      execute_applescript(%Q`
         tell application "Extra Suites"
           set x to #{start_loc[:x]}
           set y to #{start_loc[:y]}
@@ -38,9 +48,20 @@ module Castanaut; module Compatibility
       `)
     end
     
+    # Get a hash representing the current mouse cursor co-ordinates.
+    #
+    def cursor_location
+      loc = execute_applescript(%Q`
+      tell application "Extra Suites"
+        ES mouse location
+      end tell
+      `).split(/\D+/)
+      {:x => loc[0].to_i, :y => loc[1].to_i}
+    end
+    
     def click(btn)
-      raise ArgumentError.new("Only left clicking is supported") unless btn == 'left'
-      movie.execute_applescript(%Q`
+      not_supported "anything other than left clicking" unless btn == 'left'
+      execute_applescript(%Q`
         tell application "Extra Suites"
           ES click mouse
         end tell
@@ -48,8 +69,8 @@ module Castanaut; module Compatibility
     end
     
     def doubleclick(btn)
-      raise ArgumentError.new("Only left clicking is supported") unless btn == 'left'
-      movie.execute_applescript(%Q`
+      not_supported "anything other than left clicking" unless btn == 'left'
+      execute_applescript(%Q`
         tell application "Extra Suites"
           ES click mouse with double click
         end tell
@@ -57,8 +78,8 @@ module Castanaut; module Compatibility
     end
     
     def tripleclick(btn)
-      raise ArgumentError.new("Only left clicking is supported") unless btn == 'left'
-      movie.execute_applescript(%Q`
+      not_supported "anything other than left clicking" unless btn == 'left'
+      execute_applescript(%Q`
         tell application "Extra Suites"
           ES click mouse
           ES click mouse
@@ -69,9 +90,8 @@ module Castanaut; module Compatibility
     
     def type(str, opts)
       case opts[:speed]
-      when nil, 0
-        str.gsub!('"', '"& quote &"')
-        str = %Q`ES type string "#{ str }" with use clipboard`
+      when 0
+        str = %Q`ES type string "#{ movie.escape_dq(str) }" with use clipboard`
       else
         opts[:speed] = BigDecimal.new(opts[:speed].to_s)
         opts[:speed] = BigDecimal.new('50') unless opts[:speed] > 0
@@ -89,7 +109,7 @@ module Castanaut; module Compatibility
           s += "delay #{ (1 / opts[:speed]).round(2) }"
         end
       end
-      movie.execute_applescript(%Q`
+      execute_applescript(%Q`
       tell application "Extra Suites"
         #{ str }
       end tell
@@ -107,14 +127,10 @@ module Castanaut; module Compatibility
         script = hit_with_extra_suites(key, *modifiers)
       end
       puts script
-      movie.execute_applescript(script)
+      execute_applescript(script)
     end
     
-    private
-    def movie
-      @movie
-    end
-    
+    private    
     def hit_with_extra_suites(key, *modifiers)
       str = %Q{"#{ key }"}
       if !modifiers.empty?
