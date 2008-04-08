@@ -7,7 +7,7 @@ module Castanaut; module Plugin
   # It doesn't do any configuration of Mousepose on the fly. Configure 
   # Mousepose settings before running your screenplay.
   #
-  # Tested against Mousepose 2. More info: http://www.boinx.com/mousepose
+  # Tested against Mousepose 3. More info: http://www.boinx.com/mousepose
   module Mousepose
 
     # Put a halo around the mouse. If a block is given to this method,

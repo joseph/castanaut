@@ -12,8 +12,8 @@ module Castanaut
     def initialize(screenplay=nil)
       @screenplay_path = screenplay
       
-      if screenplay
-        if !File.exists?(screenplay)
+      if !irb?
+        if !File.exists?(@screenplay_path)
           raise Castanaut::Exceptions::ScreenplayNotFound 
         end
 
@@ -251,17 +251,28 @@ module Castanaut
     end
 
     # Adds custom methods to this movie instance, allowing you to perform
-    # additional actions. See the README.txt for more information.
+    # additional actions. The str can be either the file name 
+    # (e.g. 'snapz_pro') or the class name (e.g. 'SnapzPro'). 
+    # See the README.txt for more information.
     #
     def plugin(str)
+      # copied stright from the Rails underscore helper
+      str = str.to_s
+      str.gsub!(/::/, '/')
+      str.gsub!(/([A-Z]+)([A-Z][a-z])/,'\1_\2')
+      str.gsub!(/([a-z\d])([A-Z])/,'\1_\2')
+      str.tr!("-", "_")
       str.downcase!
       begin
         raise LoadError.new if irb?
         require File.join(File.dirname(@screenplay_path),"plugins","#{str}.rb")
       rescue LoadError
+        puts File.join(LIBPATH, "plugins", "#{str}.rb")
         require File.join(LIBPATH, "plugins", "#{str}.rb")
       end
-      extend eval("Castanaut::Plugin::#{str.capitalize}")
+      # copied stright from the Rails camelize helper
+      str = str.to_s.gsub(/\/(.?)/) { "::" + $1.upcase }.gsub(/(^|_)(.)/) { $2.upcase }
+      extend eval("Castanaut::Plugin::#{str}")
     end
     
     # This stage direction is slightly different to the other ones. It collects
