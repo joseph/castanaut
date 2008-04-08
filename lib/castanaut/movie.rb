@@ -318,7 +318,7 @@ module Castanaut
       def compatible_call(method, *options)
         compatibility_version.send(method, *options)
       rescue NameError
-        raise "Sorry, #{compatibility_version.to_s} doesn't support the \"#{method}\" action\n"
+        not_supported "the \"#{method}\" action"
       rescue
       end
 
