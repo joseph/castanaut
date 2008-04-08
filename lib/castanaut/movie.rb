@@ -9,44 +9,49 @@ module Castanaut
 
     # Runs the "screenplay", which is a file containing Castanaut instructions.
     #
-    def initialize(screenplay)
-      if !screenplay || !File.exists?(screenplay)
-        raise Castanaut::Exceptions::ScreenplayNotFound 
-      end
+    def initialize(screenplay=nil)
       @screenplay_path = screenplay
+      
+      if screenplay
+        if !File.exists?(screenplay)
+          raise Castanaut::Exceptions::ScreenplayNotFound 
+        end
 
-      File.open(FILE_RUNNING, 'w') {|f| f.write('')}
+        File.open(FILE_RUNNING, 'w') {|f| f.write('')}
 
-      begin
-        # We run the movie in a separate thread; in the main thread we 
-        # continue to check the "running" file flag and kill the movie if 
-        # it is removed.
-        movie = Thread.new do
-          begin
-            eval(IO.read(@screenplay_path), binding)
-          rescue => e
-            @e = e
-          ensure
-            File.unlink(FILE_RUNNING) if File.exists?(FILE_RUNNING)
+        begin
+          # We run the movie in a separate thread; in the main thread we 
+          # continue to check the "running" file flag and kill the movie if 
+          # it is removed.
+          movie = Thread.new do
+            begin
+              eval(IO.read(@screenplay_path), binding)
+            rescue => e
+              @e = e
+            ensure
+              File.unlink(FILE_RUNNING) if File.exists?(FILE_RUNNING)
+            end
           end
-        end
 
-        while File.exists?(FILE_RUNNING)
-          sleep 0.5
-          break unless movie.alive?
-        end
+          while File.exists?(FILE_RUNNING)
+            sleep 0.5
+            break unless movie.alive?
+          end
 
-        if movie.alive?
-          movie.kill
-          raise Castanaut::Exceptions::AbortedByUser
-        end
+          if movie.alive?
+            movie.kill
+            raise Castanaut::Exceptions::AbortedByUser
+          end
 
-        raise @e if @e
-      rescue => e
-        puts "ABNORMAL EXIT: #{e.message}\n" + e.backtrace.join("\n")
-      ensure
-        roll_credits
-        File.unlink(FILE_RUNNING) if File.exists?(FILE_RUNNING)
+          raise @e if @e
+        rescue => e
+          puts "ABNORMAL EXIT: #{e.message}\n" + e.backtrace.join("\n")
+        ensure
+          roll_credits
+          File.unlink(FILE_RUNNING) if File.exists?(FILE_RUNNING)
+        end
+      else
+        # We're running from irb
       end
     end
 
@@ -232,7 +237,7 @@ module Castanaut
     def script(filename)
       @cached_scripts ||= {}
       unless @cached_scripts[filename]
-        fpath = File.join(File.dirname(@screenplay_path), "scripts", filename)
+        fpath = irb? ? '' : File.join(File.dirname(@screenplay_path), "scripts", filename)
         scpt = nil
         if File.exists?(fpath)
           scpt = IO.read(fpath)
@@ -251,6 +256,7 @@ module Castanaut
     def plugin(str)
       str.downcase!
       begin
+        raise LoadError.new if irb?
         require File.join(File.dirname(@screenplay_path),"plugins","#{str}.rb")
       rescue LoadError
         require File.join(LIBPATH, "plugins", "#{str}.rb")
@@ -302,6 +308,7 @@ module Castanaut
         compatibility_version.send(method, *options)
       rescue NameError
         raise "Sorry, #{compatibility_version.to_s} doesn't support the \"#{method}\" action\n"
+      rescue
       end
 
       # A method used by the compatibility layer to display runtime messages
@@ -337,13 +344,19 @@ module Castanaut
         return unless @end_credits && @end_credits.any?
         @end_credits.each {|credit| credit.call}
       end
-      
+
+      # Returns true if this is an interactive movie (not run from a screenplay file)
+      def irb?
+        @screenplay_path.nil?
+      end
+
       # If a method isn't defined in the movie class, try doing a compatible_call.
       # This is the magic that allows methods like the execute_applescript to work
       # on Mac OS systems.
       #
       def method_missing(*args)
         compatible_call *args
+      rescue
       end
       
   end

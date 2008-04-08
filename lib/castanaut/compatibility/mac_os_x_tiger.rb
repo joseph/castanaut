@@ -126,7 +126,6 @@ module Castanaut; module Compatibility
       else
         script = hit_with_extra_suites(key, *modifiers)
       end
-      puts script
       execute_applescript(script)
     end
     

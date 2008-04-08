@@ -6,7 +6,11 @@ Rakefile
 bin/castanaut
 cbin/osxautomation
 lib/castanaut.rb
+lib/castanaut/compatibility/mac_os_x.rb
+lib/castanaut/compatibility/mac_os_x_leopard.rb
+lib/castanaut/compatibility/mac_os_x_tiger.rb
 lib/castanaut/exceptions.rb
+lib/castanaut/irb.rb
 lib/castanaut/keys.rb
 lib/castanaut/main.rb
 lib/castanaut/movie.rb
@@ -26,6 +30,3 @@ tasks/rubyforge.rake
 tasks/setup.rb
 tasks/spec.rake
 tasks/svn.rake
-tasks/test.rake
-test/example_script.screenplay
-test/googling.screenplay
