@@ -23,7 +23,11 @@ module Castanaut; module Compatibility
     end
     
     def cursor(dst_loc)
-      start_arr ||= execute_applescript("mouse location").to_s.split(',').collect{|p| p.to_s.to_i}
+      start_arr ||= execute_applescript(%Q`
+        tell application "Extra Suites"
+          ES mouse location
+        end tell
+      `).to_s.split(',').collect{|p| p.to_s.to_i}
       start_loc = {:x=>start_arr[0], :y=>start_arr[1]}
       dist = {
         :x=>(start_loc[:x] - dst_loc[:x]),
@@ -43,7 +47,7 @@ module Castanaut; module Compatibility
             set y to y - #{dist[:y].round(2)}
             delay 1.0E-6
           end repeat
-          move mouse {#{dst_loc[:x]}, #{dst_loc[:y]}}
+          ES move mouse {#{dst_loc[:x]}, #{dst_loc[:y]}}
         end tell
       `)
     end
