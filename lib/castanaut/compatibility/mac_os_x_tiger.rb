@@ -2,26 +2,35 @@ module Castanaut; module Compatibility
   require "bigdecimal"
   require "bigdecimal/math"
   
+  # The MacOsXTiger class is intended to work on machines running 
+  # Mac OS X 10.4.x  In order for this compatibility layer to work
+  # correctly, the Extras Suites application must be installed.
+  # Get it at <http://www.kanzu.com/main.html#extrasuites>
+  #
+  # == Known limitations
+  # === Not supported
+  # * Movie#mousedown
+  # * Movie#mouseup
+  # * Movie#drag
+  # === Partially supported
+  # * click - only work with left-clicks
+  #
   class MacOsXTiger < MacOsX
-    # The MacOsXTiger class is intended to work on machines running 
-    # Mac OS X 10.4.x  In order for this compatibility layer to work
-    # correctly, the Extras Suites application must be installed.
-    # Get it at <http://www.kanzu.com/main.html#extrasuites>
-    #
-    # Known limitations:
-    #  Not working:
-    #   * mousedown
-    #   * mouseup
-    #   * drag
-    #  Partially working:
-    #   * the click methods only work with left-clicks
-    #   * mousedown
-    #
     
+    # Returns true if the computer should use this compatibility layer.
+    #
+    def self.version_check
+      !!`/usr/bin/sw_vers -productVersion`.index(/10\.4\.\d+/)
+    rescue
+      false
+    end
+    
+    # Identifies this compatibility version
     def to_s
       "Mac OS 10.4 (Tiger)"
     end
     
+    # See Movie#cursor for documentation
     def cursor(dst_loc)
       start_arr ||= execute_applescript(%Q`
         tell application "Extra Suites"
@@ -52,8 +61,7 @@ module Castanaut; module Compatibility
       `)
     end
     
-    # Get a hash representing the current mouse cursor co-ordinates.
-    #
+    # See Movie#cursor_location for documentation
     def cursor_location
       loc = execute_applescript(%Q`
       tell application "Extra Suites"
@@ -63,6 +71,7 @@ module Castanaut; module Compatibility
       {:x => loc[0].to_i, :y => loc[1].to_i}
     end
     
+    # See Movie#click for documentation
     def click(btn)
       not_supported "anything other than left clicking" unless btn == 'left'
       execute_applescript(%Q`
@@ -72,6 +81,7 @@ module Castanaut; module Compatibility
       `)
     end
     
+    # See Movie#doubleclick for documentation
     def doubleclick(btn)
       not_supported "anything other than left clicking" unless btn == 'left'
       execute_applescript(%Q`
@@ -81,6 +91,7 @@ module Castanaut; module Compatibility
       `)
     end
     
+    # See Movie#tripleclick for documentation
     def tripleclick(btn)
       not_supported "anything other than left clicking" unless btn == 'left'
       execute_applescript(%Q`
@@ -92,6 +103,7 @@ module Castanaut; module Compatibility
       `)
     end
     
+    # See Movie#type for documentation
     def type(str, opts)
       case opts[:speed]
       when 0
@@ -120,6 +132,7 @@ module Castanaut; module Compatibility
       `)
     end
     
+    # See Movie#hit for documentation
     def hit(key, *modifiers)
       script = ''
       if key == '"'

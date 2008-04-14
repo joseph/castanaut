@@ -37,7 +37,10 @@ module Castanaut
     end
 
     private
-    # You shouldn't launch the default_app in the following cases.
+    # Launch the default_app if one exists before each Castanaut method except:
+    # * launch
+    # * plugin
+    # * script
     def default_app_for?(meth)
       return false unless @_default_app
       @_no_default_app_for ||= [:launch, :plugin, :script]

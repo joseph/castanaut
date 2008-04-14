@@ -1,23 +1,33 @@
 module Castanaut; module Compatibility
 
+  # This class provides some default methods that should work on all
+  # Mac OS X based systems, regardless of the exact version of your OS.
+  #
   class MacOsX
-    # The MacOsX class provides some default methods that should work on
-    # Mac OS X based systems, regardless of the exact version of your OS.
 
+    # Returns true if the computer should use this compatibility layer.
+    # Always returns false for MacOsX because this is a generic compatibility
+    # layer that shouldn't be used on it's own.
+    #
+    def self.version_check
+      false
+    end
 
     def initialize(movie)
       raise ArgumentError.new("First argument must be a Castanaut::Movie") unless movie.is_a?(Castanaut::Movie)
       @movie = movie
     end
 
-    # Launch the application matching the string given in the first argument.
-    # If the options hash is given, it should contain the co-ordinates for
-    # the window.
+    # See Movie#launch for documentation.
     #
-    # The method will also look for application-specific commands for ensuring
-    # that a window is open & positioning that window.
+    # The method will also look for application-specific commands for
+    # ensuring that a window is open & positioning that window.
+    # These methods should be named +ensure_window_for_app_name+
+    # and +positioning_for_app_name+ respectively. So, if you launch
+    # the "Address Book" application, the +ensure_window_for_address_book+
+    # and +positioning_for_address_book+ methods will be used.
     #
-    # e.g. launch "Firefox", at(10, 10, 800, 600)
+    # See Plugin::Safari#ensure_window_for_safari for an example.
     #
     def launch(app_name, options)
       ensure_window = nil

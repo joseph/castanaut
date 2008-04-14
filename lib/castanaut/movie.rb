@@ -1,3 +1,5 @@
+require 'find'
+
 module Castanaut
   # The movie class is the containing context within which screenplays are 
   # invoked. It provides a number of basic stage directions for your 
@@ -54,14 +56,14 @@ module Castanaut
         # We're running from irb
       end
     end
-
+    
     # Launch the application matching the string given in the first argument.
-    #
     # If the options hash is given, it should contain the co-ordinates for
-    # the window (top, left, width, height). The the method will format these
-    # co-ordinates appropriately.
+    # the window.
     #
-    # e.g. launch "Firefox", at(10, 10, 800, 600)
+    # Examle:
+    #
+    #   launch "Firefox", at(10, 10, 800, 600)
     #
     def launch(app_name, *options)
       options = combine_options(*options)
@@ -86,8 +88,9 @@ module Castanaut
     end
 
     # Move the mouse cursor to the specified co-ordinates.
-    #
-    # e.g. cursor to(20, 20)
+    # Example:
+    # 
+    #   cursor to(20, 20)
     #
     def cursor(*options)
       options = combine_options(*options)
@@ -142,8 +145,8 @@ module Castanaut
 
     # Sends the characters into the active control in the active window.
     #
-    # Options include:
-    # * :speed - The number of characters per second to type (more or less).
+    # Options are:
+    # * <tt>:speed</tt> - The number of characters per second to type (more or less).
     #   A speed of 0 types as quickly as possible. (default - 50)
     #
     def type(str, opts = {})
@@ -155,9 +158,9 @@ module Castanaut
     # Hit a single key on the keyboard (with optional modifiers).
     # Valid keys include any single character or any of the constants in keys.rb
     # Valid modifiers include one or more of the following: Command, Ctrl, Alt, Shift
-    #
-    # e.g. hit Castanaut::Tab
-    #      hit 'a', Castanaut::Command
+    # Examples:
+    #   hit Castanaut::Tab
+    #   hit 'a', Castanaut::Command
     def hit(key, *modifiers)
       compatible_call :hit, key, *modifiers
     end
@@ -267,7 +270,6 @@ module Castanaut
         raise LoadError.new if irb?
         require File.join(File.dirname(@screenplay_path),"plugins","#{str}.rb")
       rescue LoadError
-        puts File.join(LIBPATH, "plugins", "#{str}.rb")
         require File.join(LIBPATH, "plugins", "#{str}.rb")
       end
       # copied stright from the Rails camelize helper
@@ -300,15 +302,32 @@ module Castanaut
       # Returns an instance of the compatibility layer for the current
       # operating system.
       #
+      # Checks each class defined in the <gem_dir>/lib/castanaut/compatibility
+      # directory by running the version_check method.
+      #
       # If you're working to make Castanaut compatible with your operating system,
-      # make sure your operating system can be correctly identified here. 
+      # make sure YouCompatibilityLayer.version_check returns true on computers
+      # running the appropraite OS.
       #
       def compatibility_version
-        @compatibility_version ||= case run("/usr/bin/sw_vers -productVersion")
-        when /10\.4\.\d+/
-          Castanaut::Compatibility::MacOsXTiger.new(self)
-        else
-          Castanaut::Compatibility::MacOsXLeopard.new(self)
+        return @compatibility_version if @compatibility_version
+
+        Find.find(File.join(LIBPATH, "castanaut", "compatibility")) do |path|
+          path = path.match(/([^\/]*).rb$/)
+          next unless path
+          path = path[1]
+
+          # copied stright from the Rails camelize helper
+          path = path.to_s.gsub(/\/(.?)/) { "::" + $1.upcase }.gsub(/(^|_)(.)/) { $2.upcase }
+
+          begin
+            @compatibility_version = Object.module_eval("Castanaut::Compatibility::#{ path }")
+            raise 'wrong version' unless @compatibility_version.version_check
+          rescue
+            @compatibility_version = nil
+          end
+
+          break if @compatibility_version
         end
         @compatibility_version
       end
@@ -322,16 +341,17 @@ module Castanaut
       rescue
       end
 
-      # A method used by the compatibility layer to display runtime messages
+      # A method used by the compatibility layer to raise a NotSupportedError
       # explaining which requested options are not supported by the current
       # operating system.
       #
-      # e.g. If the movie script calls "hit 'a', Castanaut::Command"
-      #      "Warning: Mac OS 10.5 (Leopard) doesn't support modifier keys
-      #      for the 'hit' method." will be displayed for Mac OS 10.5 users.
+      # Example:
+      #   # On a Mac OS 10.5 (Leopard) machine
+      #   hit 'a', Castanaut::Command
+      #   # => "Warning: Mac OS 10.5 (Leopard) doesn't support modifier keys for the 'hit' method."
       #
       def not_supported(message)
-        puts "Warning: #{ compatibility_version.to_s } doesn't support #{ message.gsub(/\.$/, '') }."
+        raise Castanaut::Exceptions::NotSupportedError.new("Warning: #{ compatibility_version.to_s } doesn't support #{ message.gsub(/\.$/, '') }.")
       end
 
       # Escapes double quotes.
@@ -340,6 +360,12 @@ module Castanaut
         str.gsub(/\\/,'\\\\\\').gsub(/"/, '\"')
       end
 
+      # Combines a list of hashes into one hash.
+      # Example:
+      #
+      #   combine_options({:x=>10}, {:y=>20})
+      #   # => {:y=>20, :x=>10}
+      #
       def combine_options(*args)
         args.inject({}) { |result, option| result.update(option) }
       end
@@ -366,7 +392,7 @@ module Castanaut
       # on Mac OS systems.
       #
       def method_missing(*args)
-        compatible_call *args
+        compatible_call(*args)
       rescue
       end
       

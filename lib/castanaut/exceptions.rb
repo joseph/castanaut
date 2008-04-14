@@ -28,5 +28,10 @@ module Castanaut
     # this exception.
     class OSXAutomationPermissionError < CastanautError
     end
+
+    # Raised within Compatibility layers if the  requested method or options are
+    # not supported by the current operating system.
+    class NotSupportedError < CastanautError
+    end
   end
 end

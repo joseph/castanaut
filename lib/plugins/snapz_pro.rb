@@ -8,18 +8,15 @@ module Castanaut
     # Unfortunately Snapz Pro has virtually no AppleScript support so for this plugin
     # to work correctly you must do the following.
     #
-    # 1) Invoke Snapz Pro.
-    # 2) Position the initial window so that it is flush with the left side of the
-    #    screen & the top of the window is flush with the bottom of the menu-bar.
-    #    The window's close button will be below & slightly to the left of the
-    #    Apple menu.
-    # 3) Click the "Movie..." button & set everything up just the way you want it.
-    # 4) Close all Snapz Pro windows & run your castanaut script as usual :-)
+    # 1. Invoke Snapz Pro.
+    # 2. Position the initial window so that it is flush with the left side of the screen & the top of the window is flush with the bottom of the menu-bar. The window's close button will be below & slightly to the left of the Apple menu.
+    # 3. Click the "Movie..." button & set everything up just the way you want it.
+    # 4. Close all Snapz Pro windows & run your castanaut script as usual :-)
     #
     # Once your script has finished you'll have to tell Snapz how & where to save
     # the captured movie manually.
     #
-    # More info: http://www.ambrosiasw.com/utilities/snapzprox/
+    # More info: http://www.ambrosiasw.com/utilities/snapzprox
     module SnapzPro
 
       # Tell Snapz to start recording. Will automatically stop recording when
