@@ -323,6 +323,7 @@ module Castanaut
           begin
             @compatibility_version = Object.module_eval("Castanaut::Compatibility::#{ path }")
             raise 'wrong version' unless @compatibility_version.version_check
+            @compatibility_version = @compatibility_version.new(self)
           rescue
             @compatibility_version = nil
           end
