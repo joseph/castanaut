@@ -26,6 +26,28 @@ module Castanaut
         `)
       end
 
+      # Sleep until the specified element appears on-screen. Use this if you
+      # want to wait until the a page or AJAX request has finished loading
+      # before proceding to the next command.
+      #
+      # Options include:
+      # * :timeout - maximum number of seconds to wait for the element to
+      #   appear. Defaults to 10.
+      # * :index - an integer (*n*) that gets the *n*th element matching the 
+      #   selector. Defaults to the first element.
+      def wait_for_element(selector, options = {})
+        timeout = Time.now.to_i + (options[:timeout] || 10).to_i
+        while true
+          begin
+            coords = element_coordinates(selector, options)
+            return coords unless coords.nil?
+          rescue Castanaut::Exceptions::ElementNotFound
+          end
+          raise Castanaut::Exceptions::ElementNotFound if Time.now.to_i > timeout
+          sleep 0.3
+        end
+      end
+
       # Get the co-ordinates of an element in the front Safari tab. Use this
       # with Castanaut::Movie#cursor to send the mouse cursor to the element.
       #
@@ -36,8 +58,15 @@ module Castanaut
       #   Valid values are: left, center, right, and top, middle, bottom. 
       #   Defaults to ["center", "middle"].
       #   If single axis is given (eg "left"), the other axis uses its default.
+      # * :timeout - maximum number of seconds to wait for the element to appear.
+      #   Useful if you're waiting for a page load or AJAX call to complete
+      #   Defaults to 0.
       def to_element(selector, options = {})
         pos = options.delete(:area)
+        if options[:timout]
+          wait_for_element(selector, options)
+          options.delete(:timout)
+        end
         coords = element_coordinates(selector, options)
 
         x_axis, y_axis = [:center, :middle]
