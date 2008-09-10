@@ -1,3 +1,9 @@
-== 1.0.0 / 2008-02-21
+=== 1.0.1 / 2008-09-10
+
+* Added click_menu_item function. [topfunky]
+* Added basic TextMate plugin. Name is textmate to comply with Castanaut expectations. [topfunky]
+* Added gemspec.
+
+=== 1.0.0 / 2008-02-21
 
 * Initial release.

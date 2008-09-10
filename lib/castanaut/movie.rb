@@ -166,7 +166,82 @@ module Castanaut
     def say(narrative)
       run(%Q`say "#{escape_dq(narrative)}"`)
     end
+    
+    ##
+    # Click a menu item in any application.
+    #
+    # The name of the application should be the first argument.
+    #
+    # Three dots will be automatically replaced by the appropriate ellipsis.
+    #
+    #   click_menu_item("TextMate", "Navigation", "Go to Symbol...")
+    
+    def click_menu_item(*items)
+      items_as_applescript_array = items.map {|i| i.gsub!('...', "…"); %("#{i}")}.join(", ")
+      ascript = %Q(
+      -- menu_click, by Jacob Rus, September 2006
+      -- http://www.macosxhints.com/article.php?story=20060921045743404
+      -- 
+      -- Accepts a list of form: `{"Finder", "View", "Arrange By", "Date"}`
+      -- Execute the specified menu item.  In this case, assuming the Finder 
+      -- is the active application, arranging the frontmost folder by date.
 
+      on menu_click(mList)
+      	local appName, topMenu, r
+
+      	-- Validate our input
+      	if mList's length < 3 then error "Menu list is not long enough"
+
+      	-- Set these variables for clarity and brevity later on
+      	set {appName, topMenu} to (items 1 through 2 of mList)
+      	set r to (items 3 through (mList's length) of mList)
+
+      	-- This overly-long line calls the menu_recurse function with
+      	-- two arguments: r, and a reference to the top-level menu
+      	tell application "System Events" to my menu_click_recurse(r, ((process appName)'s ¬
+      		(menu bar 1)'s (menu bar item topMenu)'s (menu topMenu)))
+      end menu_click
+
+      on menu_click_recurse(mList, parentObject)
+      	local f, r
+
+      	-- `f` = first item, `r` = rest of items
+      	set f to item 1 of mList
+      	if mList's length > 1 then set r to (items 2 through (mList's length) of mList)
+
+      	-- either actually click the menu item, or recurse again
+      	tell application "System Events"
+      		if mList's length is 1 then
+      			click parentObject's menu item f
+      		else
+      			my menu_click_recurse(r, (parentObject's (menu item f)'s (menu f)))
+      		end if
+      	end tell
+      end menu_click_recurse
+
+
+      menu_click({#{items_as_applescript_array}})
+      )
+      execute_applescript(ascript)
+    end
+
+    ##
+    # Warning: FLAKY
+    #
+    # Hit a command key combo.
+    #
+    # Use lowercase for normal, or uppercase if shift should be used also.
+    #
+    # Option and Ctrl aren't currently supported.
+    
+    def keystroke(character)
+      execute_applescript(%Q'
+    	  tell application "System Events"
+    		  keystroke "#{character}"
+    	  end tell    
+      ')
+    end
+    
     # Starts saying the narrative text, and simultaneously begins executing
     # the given block. Waits until both are finished.
     #
