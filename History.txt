@@ -3,6 +3,8 @@
 * Added click_menu_item function. [topfunky]
 * Added basic TextMate plugin. Name is textmate to comply with Castanaut expectations. [topfunky]
 * Added gemspec.
+* Added wait_for_element method from http://github.com/metavida/castanaut/commit/50ed4cbd35bc96d2f84381674aa50a574e628431 [metavida]
+* Fixed keystroke method from http://github.com/jlsync/castanaut/commit/94a5756ce2b41ae1e37f4df246ab8cd69d9ba3d2 [jlsync]
 
 === 1.0.0 / 2008-02-21
 

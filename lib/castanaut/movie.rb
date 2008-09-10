@@ -226,9 +226,7 @@ module Castanaut
     end
 
     ##
-    # Warning: FLAKY
-    #
-    # Hit a command key combo.
+    # Hit a command key combo toward the currently active application.
     #
     # Use lowercase for normal, or uppercase if shift should be used also.
     #
@@ -237,7 +235,10 @@ module Castanaut
     def keystroke(character)
       execute_applescript(%Q'
     	  tell application "System Events"
-    		  keystroke "#{character}"
+          set frontApp to name of first item of (processes whose frontmost is true)
+          tell application frontApp
+    		    keystroke "#{character}" using {command down}
+  		    end
     	  end tell    
       ')
     end
