@@ -226,18 +226,38 @@ module Castanaut
     end
 
     ##
+    # Convenience method for grouping things into labeled blocks.
+    #
+    #   perform "Build CouchDB from source" do
+    #     launch "Terminal"
+    #     type "./configure"
+    #     hit Enter
+    #     ...
+    #   end
+    
+    def perform(label)
+      yield
+    end
+
+    ##
     # Hit a command key combo toward the currently active application.
     #
-    # Use lowercase for normal, or uppercase if shift should be used also.
+    # Use any combination of "command", "option", "control", "shift".
+    # ("command" is the default).
     #
-    # Option and Ctrl aren't currently supported.
+    # Case matters! It's easiest to use lowercase, then "shift" if needed.
+    #
+    #   keystroke "t"                     # COMMAND-t
+    #   keystroke "k", "control", "shift" # A combo
     
-    def keystroke(character)
+    def keystroke(character, *special_keys)
+      special_keys = ["command"] if special_keys.length == 0
+      special_keys_as_applescript_array = special_keys.map {|k| "#{k} down"}.join(", ")
       execute_applescript(%Q'
     	  tell application "System Events"
           set frontApp to name of first item of (processes whose frontmost is true)
           tell application frontApp
-    		    keystroke "#{character}" using {command down}
+    		    keystroke "#{character}" using {#{special_keys_as_applescript_array}}
   		    end
     	  end tell    
       ')
