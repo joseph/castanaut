@@ -140,10 +140,19 @@ module Castanaut
       automatically "mousedrag #{options[:to][:left]} #{options[:to][:top]}"
     end
 
+    ##
     # Sends the characters into the active control in the active window.
-    #
+
     def type(str)
-      automatically "type #{str}"
+      execute_applescript(%Q'
+    	  tell application "System Events"
+          set frontApp to name of first item of (processes whose frontmost is true)
+          tell application frontApp
+    		    keystroke "#{str}"
+  		    end
+    	  end tell    
+      ')
+      pause 1
     end
 
     # Sends the keycode (a hex value) to the active control in the active 

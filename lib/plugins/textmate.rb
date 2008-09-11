@@ -25,7 +25,7 @@ module Castanaut; module Plugin
     ##
     # Open a file, optionally at a specific line and column.
     
-    def tm_get_url(file_path, line=0, column=0)
+    def tm_open_file(file_path, line=0, column=0)
       full_url = "txmt://open?url=file://#{file_path}&line=#{line}&column=#{column}"
       execute_applescript(%Q`
         tell application "TextMate"
