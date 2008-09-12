@@ -1,4 +1,7 @@
 module Castanaut
+  
+  class SkipError < StandardError; end
+  
   # The movie class is the containing context within which screenplays are 
   # invoked. It provides a number of basic stage directions for your 
   # screenplays, and can be extended with plugins.
@@ -246,6 +249,12 @@ module Castanaut
     
     def perform(label)
       yield
+    rescue Castanaut::SkipError => e
+      puts "Skipping #{label}"
+    end
+
+    def skip
+      raise Castanaut::SkipError
     end
 
     ##
