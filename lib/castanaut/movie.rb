@@ -147,6 +147,7 @@ module Castanaut
     # Sends the characters into the active control in the active window.
 
     def type(str)
+      str.gsub!(/"/, '\"')
       execute_applescript(%Q'
     	  tell application "System Events"
           set frontApp to name of first item of (processes whose frontmost is true)
