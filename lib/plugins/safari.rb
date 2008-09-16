@@ -63,9 +63,9 @@ module Castanaut
       #   Defaults to 0.
       def to_element(selector, options = {})
         pos = options.delete(:area)
-        if options[:timout]
+        if options[:timeout]
           wait_for_element(selector, options)
-          options.delete(:timout)
+          options.delete(:timeout)
         end
         coords = element_coordinates(selector, options)
 
