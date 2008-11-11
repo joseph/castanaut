@@ -89,6 +89,8 @@ module Castanaut
       `)
     end
 
+    alias :activate, :launch
+
     # Move the mouse cursor to the specified co-ordinates.
     #
     def cursor(*options)
