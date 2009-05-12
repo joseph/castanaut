@@ -1,25 +1,19 @@
-# Look in the tasks/setup.rb file for the various options that can be
-# configured in this Rakefile. The .rake files in the tasks directory
-# are where the options are used.
+# -*- ruby -*-
 
-load 'tasks/setup.rb'
-
-ensure_in_path 'lib'
-require 'castanaut'
+require 'rubygems'
+require 'hoe'
+require './lib/castanaut.rb'
 
 task :default => 'spec:run'
 
-PROJ.name = 'castanaut'
-PROJ.authors = 'Joseph Pearson'
-PROJ.email = 'joseph@inventivelabs.com.au'
-PROJ.url = 'http://castanaut.rubyforge.org'
-PROJ.version = Castanaut::VERSION
+Hoe.new('castanaut', Castanaut::VERSION) do |p|
+  p.developer('Joseph Pearson', 'joseph@inventivelabs.com.au')
+  p.description = "Automate your screencasts."
+  p.summary = "Automate your screencasts."
+  p.url = "http://castanaut.rubyforge.org"
+  p.remote_rdoc_dir = 'doc'
+  
+end
 
-PROJ.rubyforge_name = 'castanaut'
-PROJ.rdoc_remote_dir = 'doc'
-
-PROJ.exclude += ['^spec\/*', '^test\/*']
-
-PROJ.spec_opts << '--color'
-
-# EOF
+# PROJ.exclude += ['^spec\/*', '^test\/*']
+# PROJ.spec_opts << '--color'
