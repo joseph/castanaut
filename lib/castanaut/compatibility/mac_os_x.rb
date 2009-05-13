@@ -68,7 +68,7 @@ module Castanaut; module Compatibility
     # voice saying the narrative text.
     #
     def say(narrative)
-      run(%Q`say "#{escape_dq(narrative)}"`)
+      run(%Q`say "#{escape_dq(narrative)}"`) unless ENV['SHHH']
     end
     
     # Returns a region hash describing the entire screen area.
@@ -90,6 +90,7 @@ module Castanaut; module Compatibility
     def execute_applescript(scpt)
       File.open(FILE_APPLESCRIPT, 'w') {|f| f.write(scpt)}
       result = run("osascript #{FILE_APPLESCRIPT}")
+      puts scpt if defined?(ENV['VERBOSE'])
       File.unlink(FILE_APPLESCRIPT)
       result
     end
