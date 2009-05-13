@@ -156,7 +156,7 @@ module Castanaut
     def type(str, opts = {})
       opts[:speed] = 50 unless opts[:speed].nil?
       
-      compatible_call :type, str, opts
+      compatible_call :type, str.safe_quote, opts
     end
 
     # TODO - determine which #type to use
