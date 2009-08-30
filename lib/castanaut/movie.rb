@@ -154,25 +154,25 @@ module Castanaut
     #   A speed of 0 types as quickly as possible. (default - 50)
     #
     def type(str, opts = {})
-      opts[:speed] = 50 unless opts[:speed].nil?
-      
-      compatible_call :type, str.safe_quote, opts
+      opts[:speed] = 50 unless !opts[:speed].nil?
+      opts[:speed] = opts[:speed] / 1000.0
+
+      full_str = ""
+      str.split("").each do |a|
+        a.gsub!(/"/, '\"')
+        full_str += "delay #{opts[:speed]}\n" if !full_str.empty?
+        full_str += "keystroke \"#{a}\"\n"
+      end
+      cmd = %Q'
+          tell application "System Events"
+            set frontApp to name of first item of (processes whose frontmost is true)
+            tell application frontApp
+              #{full_str}
+            end
+          end tell
+      '
+      execute_applescript cmd
     end
-
-    # TODO - determine which #type to use
-
-    # def type(str)
-    #   str.gsub!(/"/, '\"')
-    #   execute_applescript(%Q'
-    #       tell application "System Events"
-    #       set frontApp to name of first item of (processes whose frontmost is true)
-    #       tell application frontApp
-    #             keystroke "#{str}"
-    #           end
-    #       end tell    
-    #   ')
-    #   pause 1
-    # end
 
     # Hit a single key on the keyboard (with optional modifiers).
     # Valid keys include any single character or any of the constants in keys.rb

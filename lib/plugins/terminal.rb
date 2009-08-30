@@ -36,8 +36,8 @@ module Castanaut
       #   `)
       # end
 
-      def cli(cmd)
-        type cmd
+      def cli(cmd, opts = {})
+        type(cmd, opts)
       end
 
       def type_pre(string)
