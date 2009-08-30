@@ -27,7 +27,6 @@ module Castanaut
 
       def cli(cmd)
         type cmd
-        keystroke_literal('return')
       end
 
       def type_pre(string)
