@@ -20,6 +20,13 @@ module Castanaut
         execute_applescript ensure_window_for_terminal
       end
 
+      def run_in_terminal(cmd)
+        execute_applescript "
+          tell application \"Terminal\"
+            #{do_script(cmd)} in window 1
+          end tell"
+      end
+
       # Open a URL in the front Safari tab.
       # def url(str)
       #   execute_applescript(%Q`
