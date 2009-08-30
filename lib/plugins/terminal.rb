@@ -8,7 +8,11 @@ module Castanaut
       # applescript fragment for new windows. i use terminal to edit the code so I always want a new window instance
       def ensure_window_for_terminal
         # "if (count(windows)) < 1 then make new document"
-        'do script ""'
+        do_script
+      end
+
+      def do_script(args = '')
+        "do script \"#{args}\""
       end
 
       def launch_terminal
