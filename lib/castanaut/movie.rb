@@ -208,7 +208,7 @@ module Castanaut
     #   click_menu_item("TextMate", "Navigation", "Go to Symbol...")
     
     def click_menu_item(*items)
-      items_as_applescript_array = items.map {|i| i.gsub!('...', "…"); %("#{i}")}.join(", ")
+      items_as_applescript_array = items.join(", ")
       ascript = %Q(
       -- menu_click, by Jacob Rus, September 2006
       -- http://www.macosxhints.com/article.php?story=20060921045743404
@@ -229,7 +229,7 @@ module Castanaut
 
       	-- This overly-long line calls the menu_recurse function with
       	-- two arguments: r, and a reference to the top-level menu
-      	tell application "System Events" to my menu_click_recurse(r, ((process appName)'s ¬
+      	tell application "System Events" to my menu_click_recurse(r, ((process appName)'s
       		(menu bar 1)'s (menu bar item topMenu)'s (menu topMenu)))
       end menu_click
 
