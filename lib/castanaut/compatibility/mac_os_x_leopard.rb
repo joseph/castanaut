@@ -72,13 +72,29 @@ module Castanaut; module Compatibility
       apply_offset(options)
       automatically "mousedrag #{options[:to][:left]} #{options[:to][:top]}"
     end
-    
+
     # See Movie#type for documentation
-    def type(str, opts)
-      not_supported "additional options for the 'type' method" unless opts.keys.empty?
-      automatically "type #{str}"
+    def type(str, opts = {})
+      opts[:speed] = 50 unless !opts[:speed].nil?
+      opts[:speed] = opts[:speed] / 1000.0
+
+      full_str = ""
+      str.split("").each do |a|
+        a.gsub!(/"/, '\"')
+        full_str += "delay #{opts[:speed]}\n" if !full_str.empty?
+        full_str += "keystroke \"#{a}\"\n"
+      end
+      cmd = %Q'
+          tell application "System Events"
+            set frontApp to name of first item of (processes whose frontmost is true)
+            tell application frontApp
+              #{full_str}
+            end
+          end tell
+      '
+      execute_applescript cmd
     end
-    
+
     # See Movie#hit for documentation
     def hit(key, *modifiers)
       not_supported "modifier keys for the 'hit' method" unless modifiers.empty?

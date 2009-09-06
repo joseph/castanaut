@@ -154,24 +154,7 @@ module Castanaut
     #   A speed of 0 types as quickly as possible. (default - 50)
     #
     def type(str, opts = {})
-      opts[:speed] = 50 unless !opts[:speed].nil?
-      opts[:speed] = opts[:speed] / 1000.0
-
-      full_str = ""
-      str.split("").each do |a|
-        a.gsub!(/"/, '\"')
-        full_str += "delay #{opts[:speed]}\n" if !full_str.empty?
-        full_str += "keystroke \"#{a}\"\n"
-      end
-      cmd = %Q'
-          tell application "System Events"
-            set frontApp to name of first item of (processes whose frontmost is true)
-            tell application frontApp
-              #{full_str}
-            end
-          end tell
-      '
-      execute_applescript cmd
+      compatible_call :type, str, opts
     end
 
     # Hit a single key on the keyboard (with optional modifiers).
