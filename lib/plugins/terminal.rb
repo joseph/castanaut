@@ -27,6 +27,13 @@ module Castanaut
           end tell"
       end
 
+      def focus_on_terminal
+        execute_applescript "
+          tell application \"Terminal\"
+            activate
+          end tell"
+      end
+
       # Open a URL in the front Safari tab.
       # def url(str)
       #   execute_applescript(%Q`
