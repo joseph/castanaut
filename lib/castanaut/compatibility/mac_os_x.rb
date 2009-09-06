@@ -90,7 +90,7 @@ module Castanaut; module Compatibility
     def execute_applescript(scpt)
       File.open(FILE_APPLESCRIPT, 'w') {|f| f.write(scpt)}
       result = run("osascript #{FILE_APPLESCRIPT}")
-      puts scpt if defined?(ENV['VERBOSE'])
+      #puts scpt if defined?(ENV['VERBOSE'])
       File.unlink(FILE_APPLESCRIPT)
       result
     end
