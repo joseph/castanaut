@@ -32,12 +32,12 @@ module Castanaut
       #
       # Options include:
       # * :timeout - maximum number of seconds to wait for the element to
-      #   appear. Defaults to 10.
+      #     appear. Defaults to 10.
       # * :index - an integer (*n*) that gets the *n*th element matching the
-      #   selector. Defaults to the first element.
-      #    appear. Defaults to 10.
+      #     selector. Defaults to the first element.
+      #     appear. Defaults to 10.
       # * :index - an integer (*n*) that gets the *n*th element matching the
-      #    selector. Defaults to the first element.
+      #     selector. Defaults to the first element.
       #
       def wait_for_element(selector, options = {})
         timeout = Time.now.to_i + (options[:timeout] || 10).to_i
@@ -62,9 +62,10 @@ module Castanaut
       #   Valid values are: left, center, right, and top, middle, bottom.
       #   Defaults to ["center", "middle"].
       #   If single axis is given (eg "left"), the other axis uses its default.
-      # * :timeout - maximum number of seconds to wait for the element to appear.
+      # * :timeout - maximum seconds to wait for the element to appear.
       #   Useful if you're waiting for a page load or AJAX call to complete
       #   Defaults to 0.
+      #
       def to_element(selector, options = {})
         pos = options.delete(:area)
         if options[:timeout]
