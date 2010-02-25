@@ -1,5 +1,3 @@
-require 'find'
-
 module Castanaut
 
   # The movie class is the containing context within which screenplays are
@@ -413,7 +411,7 @@ module Castanaut
     # voice saying the narrative text.
     #
     def say(narrative)
-      compatible_call :say, narrative
+      not_supported('say')
     end
 
 

@@ -16,8 +16,8 @@ module Castanaut
   #       end
   #     end
   #   end
-  #     
-  # The script must exist in a sub-directory of the screenplay's location 
+  #
+  # The script must exist in a sub-directory of the screenplay's location
   # called "plugins", and must be called (in this case): foo.rb.
   #
   module Plugin
