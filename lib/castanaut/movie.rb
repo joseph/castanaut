@@ -175,13 +175,7 @@ module Castanaut
 
     # Sends the characters into the active control in the active window.
     #
-    # Options are:
-    # * <tt>:speed</tt> - The number of characters per second to type (more or less).
-    #   A speed of 0 types as quickly as possible. (default - 50)
-    #
     def type(str, opts = {})
-      opts[:speed] = 50 unless opts[:speed].nil?
-
       compatible_call :type, str, opts
     end
 

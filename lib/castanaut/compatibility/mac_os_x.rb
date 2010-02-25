@@ -90,7 +90,7 @@ module Castanaut; module Compatibility
     def execute_applescript(scpt)
       File.open(FILE_APPLESCRIPT, 'w') {|f| f.write(scpt)}
       result = run("osascript #{FILE_APPLESCRIPT}")
-      puts scpt if defined?(ENV['VERBOSE'])
+      #puts scpt if defined?(ENV['VERBOSE'])
       File.unlink(FILE_APPLESCRIPT)
       result
     end
@@ -171,17 +171,31 @@ module Castanaut; module Compatibility
 
 
     # Sends the characters into the active control in the active window.
+    #
+    # Options are:
+    #
+    # * <tt>:speed</tt> - Number of characters per second to type (more or less).
+    #   A speed of 0 types as quickly as possible. (default - 50)
+    #
     def type(str, opts = {})
-      str.gsub!(/"/, '\"')
-      execute_applescript(%Q`
-        tell application "System Events"
-        set frontApp to name of first item of (processes whose frontmost is true)
-        tell application frontApp
-        keystroke "#{str}"
-        end
-        end tell
-      `)
-      sleep(1)
+      opts[:speed] = 50 unless !opts[:speed].nil?
+      opts[:speed] = opts[:speed] / 1000.0
+
+      full_str = ""
+      str.split("").each do |a|
+        a.gsub!(/"/, '\"')
+        full_str += "delay #{opts[:speed]}\n" if !full_str.empty?
+        full_str += "keystroke \"#{a}\"\n"
+      end
+      cmd = %Q'
+          tell application "System Events"
+            set frontApp to name of first item of (processes whose frontmost is true)
+            tell application frontApp
+              #{full_str}
+            end
+          end tell
+      '
+      execute_applescript cmd
       str
     end
 

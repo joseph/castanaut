@@ -8,7 +8,30 @@ module Castanaut
       # applescript fragment for new windows. i use terminal to edit the code so I always want a new window instance
       def ensure_window_for_terminal
         # "if (count(windows)) < 1 then make new document"
-        'do script ""'
+        do_script
+      end
+
+      def do_script(args = '')
+        "do script \"#{args}\""
+      end
+
+      def launch_terminal
+        launch "Terminal"
+        execute_applescript ensure_window_for_terminal
+      end
+
+      def run_in_terminal(cmd)
+        execute_applescript "
+          tell application \"Terminal\"
+            #{do_script(cmd)} in window 1
+          end tell"
+      end
+
+      def focus_on_terminal
+        execute_applescript "
+          tell application \"Terminal\"
+            activate
+          end tell"
       end
 
       # Open a URL in the front Safari tab.
@@ -20,9 +43,9 @@ module Castanaut
       #   `)
       # end
 
-      def cli(cmd)
-        type cmd
-        keystroke_literal('return')
+      def cli(cmd, opts = {})
+        type(cmd, opts)
+        hit Enter
       end
 
       def type_pre(string)
