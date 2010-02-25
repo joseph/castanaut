@@ -16,6 +16,7 @@ spec = Gem::Specification.new do |s|
     Dir['lib/**/*.rb'] +
     Dir['scripts/**/*.js'] +
     Dir['test/**/*.rb']
+  s.executables = ["castanaut"]
   s.require_path = 'lib'
   s.has_rdoc = true
   s.extra_rdoc_files = Dir['*.txt']
