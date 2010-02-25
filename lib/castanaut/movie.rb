@@ -407,13 +407,12 @@ module Castanaut
       end
 
 
-      # The break & butter of Castanaut's cross-OS compatibility.
+      # The bread & butter of Castanaut's cross-OS compatibility.
       #
       def compatible_call(method, *options)
         compatibility_version.send(method, *options)
       rescue NameError
         not_supported "the \"#{method}\" action"
-      rescue
       end
 
 

@@ -169,6 +169,22 @@ module Castanaut; module Compatibility
     end
 
 
+    # Sends the characters into the active control in the active window.
+    def type(str, opts = {})
+      str.gsub!(/"/, '\"')
+      execute_applescript(%Q`
+        tell application "System Events"
+        set frontApp to name of first item of (processes whose frontmost is true)
+        tell application frontApp
+        keystroke "#{str}"
+        end
+        end tell
+      `)
+      sleep(1)
+      str
+    end
+
+
     private
     # Returns the current movie instance.
     #
