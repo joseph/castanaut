@@ -5,16 +5,16 @@
 
 == DESCRIPTION:
 
-Castanaut lets you write executable scripts for your screencasts. With a 
-simple dictionary of stage directions, you can create complex interactions 
-with a variety of applications. Currently, and for the foreseeable future, 
+Castanaut lets you write executable scripts for your screencasts. With a
+simple dictionary of stage directions, you can create complex interactions
+with a variety of applications. Currently, and for the foreseeable future,
 Castanaut supports Mac OS X 10.5 only.
 
 == SYNOPSIS:
 
 === Writing screenplays
 
-You write your screenplays as Ruby files. Castanaut has been designed to 
+You write your screenplays as Ruby files. Castanaut has been designed to
 read fairly naturally to the non-technical, within Ruby's constraints.
 
 Here's a simple screenplay:
@@ -31,12 +31,12 @@ Here's a simple screenplay:
   say "I drew a square!"
 
 With any luck we don't need to explain to you what this screenplay
-does. The only thing that might need some explanation is "say" -- this has a 
-robotic voice speak the given string. (Also: all numbers are pixel 
+does. The only thing that might need some explanation is "say" -- this has a
+robotic voice speak the given string. (Also: all numbers are pixel
 co-ordinates).
 
 About the robot: no, we don't recommend you use this in real screencasts for
-a large audience. Most people find it a little offputting.  
+a large audience. Most people find it a little offputting.
 You are free to contravene our recommendation though. You
 can tweak the robot in the Mac OS X Speech Preferences pane.
 
@@ -46,7 +46,7 @@ Simply give the screenplay to the castanaut command, like this:
 
   castanaut test.screenplay
 
-This assumes you have a screenplay file called "test.screenplay" in the 
+This assumes you have a screenplay file called "test.screenplay" in the
 directory where you are running the command.
 
 Of course, it isn't always convenient to drop to the terminal to run your
@@ -57,7 +57,7 @@ You need to add this line (the "shebang" line) at the top of your screenplay:
 
 Then you need to set the screenplay to be executable by running this command
 on it:
-  
+
   chmod a+x test.screenplay
 
 Again, substitute "test.screenplay" for your screenplay's filename.
@@ -68,25 +68,38 @@ it with Quicksilver, or run it any other way that floats your boat.
 === Stopping the screenplay
 
 If you want to abruptly terminate execution before the end of the screenplay,
-you just need to run the 'castanaut' command again -- with or without any 
+you just need to run the 'castanaut' command again -- with or without any
 arguments.
 
-Of course, that might be easier said than done, if you haven't got full 
+Of course, that might be easier said than done, if you haven't got full
 control of the mouse or keyboard at the time. One recommendation is to assign
 a system hot-key to invoke castanaut. I use a Quicksilver trigger for this,
 assigned to Shift-F1, that calls castanaut. You'll need the full path to
-the command for this, which is usually /usr/bin/castanaut, but you can check 
+the command for this, which is usually /usr/bin/castanaut, but you can check
 it with the following command:
 
   which "castanaut"
 
+== Running interactively with IRB
+
+You can now run Castanaut interactively from IRB — to test commands, try stuff
+out, etc:
+
+    $ irb -r 'castanaut'
+    >> irb Castanaut::Movie.new
+    >> move to(100, 100)
+    => "Moving mouse.\n"
+
+Note that this technique creates an IRB subsession, so you'll have to exit out
+of that before exiting out of IRB. There's heaps you can do with subsessions -
+read up about them online.
 
 === What stage directions can I make?
 
 Out of the box, Castanaut performs mouse actions, keyboard actions,
 robot speech and application launches.
 
-For a complete overview of the built-in stage directions, see the 
+For a complete overview of the built-in stage directions, see the
 Castanaut::Movie class.
 
 === Using plugins
@@ -114,7 +127,7 @@ To use a plugin, simply declare it:
   click
   pause 4
   say "Oh. I was hoping for more results."
-  
+
 
 In the example above, we use the two methods provided by the Safari module:
 url, which causes Safari to navigate to the given url, and to_element, which
@@ -123,7 +136,7 @@ the screen.
 
 === Creating your own plugins
 
-Advanced users can create their own plugins. Put them in a directory 
+Advanced users can create their own plugins. Put them in a directory
 called "plugins" below the directory containing the screenplays that use
 the plugin.
 
