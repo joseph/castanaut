@@ -14,15 +14,15 @@ module Castanaut
     #  If monitor is true, we'll monitor the kill file (FILE_RUNNING) -
     #  if it is deleted, we abort.
     #
-    def initialize(screenplay=nil, monitor = true)
+    def initialize(screenplay = nil, monitor = true)
       if screenplay
-        monitor ? play_and_monitor(screenplay) : play(screenplay)
+        monitor ? _play_and_monitor(screenplay) : _play(screenplay)
       end
     end
 
 
     # Simply plays the screenplay in the current thread.
-    def play(screenplay)
+    def _play(screenplay)
       unless File.exists?(@screenplay_path = screenplay)
         raise Castanaut::Exceptions::ScreenplayNotFound
       end
@@ -34,7 +34,7 @@ module Castanaut
     # Plays the screenplay in a separate thread, and monitors the killfile
     # (which is at FILE_RUNNING) - if it is deleted, the screenplay will
     # abort.
-    def play_and_monitor(screenplay)
+    def _play_and_monitor(screenplay)
       unless File.exists?(@screenplay_path = screenplay)
         raise Castanaut::Exceptions::ScreenplayNotFound
       end
