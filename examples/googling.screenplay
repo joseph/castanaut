@@ -29,7 +29,7 @@ pause 0.5
 type "http://inventivelabs.com.au"
 hit Enter
 
-pause 6
+pause 3
 
 move to_element("#switch")
 click

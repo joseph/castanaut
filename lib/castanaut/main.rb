@@ -5,13 +5,13 @@ module Castanaut
   class Main
 
     # If Castanaut is not running, this runs the movie specified as the first
-    # argument. If it *is* already running, this nixes the flag file, which 
+    # argument. If it *is* already running, this nixes the flag file, which
     # should cause Castanaut to stop.
     def self.run(args)
-      if File.exists?(Castanaut::FILE_RUNNING) 
+      if File.exists?(Castanaut::FILE_RUNNING)
         File.unlink(Castanaut::FILE_RUNNING)
       else
-        Castanaut::Movie.new(args.shift)
+        Castanaut::Movie.spawn(args.shift)
       end
     end
 

@@ -10,11 +10,31 @@ module Castanaut
   # you must make sure that *all* methods in this class work correctly.
   class Movie
 
+    def self.register(name)
+      unless reg = Castanaut::Movie.instance_variable_get(:@movie_classes)
+        reg = Castanaut::Movie.instance_variable_set(:@movie_classes, {})
+      end
+      self.instance_variable_set(:@name, name)
+      reg.update(self => name)
+    end
+
+
+    def self.spawn(screenplay = nil, monitor = true)
+      reg = Castanaut::Movie.instance_variable_get(:@movie_classes)
+      klass = reg.keys.detect { |k| k.platform_supported? }
+      klass.new(screenplay, monitor)
+    end
+
+
     #  Creates the movie. If a screenplay is provided here, it will be run.
     #  If monitor is true, we'll monitor the kill file (FILE_RUNNING) -
     #  if it is deleted, we abort.
     #
     def initialize(screenplay = nil, monitor = true)
+      if self.class == Castanaut::Movie
+        raise "#{self} is an abstract class. Try the spawn method."
+      end
+
       if screenplay
         monitor ? _play_and_monitor(screenplay) : _play(screenplay)
       end
@@ -75,133 +95,19 @@ module Castanaut
     end
 
 
-    # Launch the application matching the string given in the first argument.
-    # If the options hash is given, it should contain the co-ordinates for
-    # the window.
+
+    #--------------------------------------------------------------------------
+    # IMPLEMENTED DIRECTIONS
     #
-    # Examle:
-    #
-    #   launch "Firefox", at(10, 10, 800, 600)
-    #
-    def launch(app_name, *options)
-      options = combine_options(*options)
-
-      compatible_call :launch, app_name, options
-    end
-
-
-    # Returns a region hash describing the entire screen area.
-    #
-    # Expects compatible_call to return a hash with :width & :heigt keys.
-    #
-    def screen_size
-      compatible_call :screen_size
-    end
-
-
-    # Get a hash representing the current mouse cursor co-ordinates.
-    #
-    # Expects compatible_call to return a hash with :x & :y keys.
-    #
-    def cursor_location
-      compatible_call :cursor_location
-    end
-
-
-    # Move the mouse cursor to the specified co-ordinates.
-    # Example:
-    #
-    #   cursor to(20, 20)
-    #
-    def cursor(*options)
-      options = combine_options(*options)
-      apply_offset(options)
-      @cursor_loc ||= {}
-      @cursor_loc[:x] = options[:to][:left]
-      @cursor_loc[:y] = options[:to][:top]
-
-      compatible_call :cursor, @cursor_loc
-    end
-
-    alias :move :cursor
-
-
-    # Send a mouse-click at the current mouse location.
-    #
-    def click(btn = 'left')
-      compatible_call :click, btn
-    end
-
-
-    # Send a double-click at the current mouse location.
-    #
-    def doubleclick(btn = 'left')
-      compatible_call :doubleclick, btn
-    end
-
-
-    # Send a triple-click at the current mouse location.
-    #
-    def tripleclick(btn = 'left')
-      compatible_call :doubleclick, btn
-    end
-
-
-    # Press the button down at the current mouse location. Does not
-    # release the button until the mouseup method is invoked.
-    #
-    def mousedown(btn = 'left')
-      compatible_call :mousedown, btn
-    end
-
-
-    # Releases the mouse button pressed by a previous mousedown.
-    #
-    def mouseup(btn = 'left')
-      compatible_call :mouseup, btn
-    end
-
-
-    # "Drags" the mouse by (effectively) issuing a mousedown at the current
-    # mouse location, then moving the mouse to the specified coordinates, then
-    # issuing a mouseup.
-    #
-    def drag(*options)
-      compatible_call :drag, *options
-    end
-
-
-    # Sends the characters into the active control in the active window.
-    #
-    def type(str, opts = {})
-      compatible_call :type, str, opts
-    end
-
-
-    # Hit a single key on the keyboard (with optional modifiers).
-    # Valid keys include any single character or any of the constants in keys.rb
-    # Valid modifiers include one or more of the following: Command, Ctrl, Alt, Shift
-    # Examples:
-    #   hit Castanaut::Tab
-    #   hit 'a', Castanaut::Command
-    def hit(key, *modifiers)
-      compatible_call :hit, key, *modifiers
-    end
-
+    # You can override these in subclasses, but you'd probably want to have
+    # a very good reason.
+    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     # Don't do anything for the specified number of seconds (can be portions
     # of a second).
     #
     def pause(seconds)
       sleep seconds
-    end
-
-
-    # Use text-to-speech functionality to emulate a human
-    # voice saying the narrative text.
-    #
-    def say(narrative)
-      compatible_call :say, narrative
     end
 
 
@@ -322,6 +228,8 @@ module Castanaut
     # (e.g. 'snapz_pro') or the class name (e.g. 'SnapzPro').
     # See the README.txt for more information.
     #
+    # FIXME: sort out this underscore/camelize mess.
+    #
     def plugin(str)
       # copied stright from the Rails underscore helper
       str = str.to_s
@@ -364,51 +272,152 @@ module Castanaut
     end
 
 
+    #--------------------------------------------------------------------------
+    # KEYBOARD INPUT DIRECTIONS
+    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    # Sends the characters into the active control in the active window.
+    #
+    # Options are:
+    #
+    # * <tt>:speed</tt> - approximate umber of characters per second
+    #     A speed of 0 types as quickly as possible. (default - 50)
+    #
+    def type(str, opts = {})
+      not_supported('type')
+    end
+
+
+    # Hit a single key on the keyboard (with optional modifiers).
+    #
+    # Valid keys include any single character or any of the constants in keys.rb
+    #
+    # Valid modifiers include one or more of the following:
+    #   Command
+    #   Ctrl
+    #   Alt
+    #   Shift
+    #
+    # Examples:
+    #   hit Castanaut::Tab
+    #   hit 'a', Castanaut::Command
+    #
+    def hit(key, *modifiers)
+      not_supported('hit')
+    end
+
+
+    #---------------------------------------------------------------------------
+    # MOUSE INPUT DIRECTIONS
+    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    # Move the mouse cursor to the specified co-ordinates.
+    # Example:
+    #
+    #   cursor to(20, 20)
+    #
+    def cursor(*options)
+      not_supported('cursor')
+    end
+
+    alias :move :cursor
+
+
+    # Get a hash representing the current mouse cursor co-ordinates.
+    #
+    # Should return a hash with :x & :y keys.
+    #
+    def cursor_location
+      not_supported('cursor_location')
+    end
+
+
+    # Send a mouse-click at the current mouse location.
+    #
+    def click(btn = 'left')
+      not_supported('click')
+    end
+
+
+    # Send a double-click at the current mouse location.
+    #
+    def doubleclick(btn = 'left')
+      not_supported('doubleclick')
+    end
+
+
+    # Send a triple-click at the current mouse location.
+    #
+    def tripleclick(btn = 'left')
+      not_supported('tripleclick')
+    end
+
+
+    # Press the button down at the current mouse location. Does not
+    # release the button until the mouseup method is invoked.
+    #
+    def mousedown(btn = 'left')
+      not_supported('mousedown')
+    end
+
+
+    # Releases the mouse button pressed by a previous mousedown.
+    #
+    def mouseup(btn = 'left')
+      not_supported('mouseup')
+    end
+
+
+    # "Drags" the mouse by (effectively) issuing a mousedown at the current
+    # mouse location, then moving the mouse to the specified coordinates, then
+    # issuing a mouseup.
+    #
+    def drag(*options)
+      not_supported('drag')
+    end
+
+
+    #--------------------------------------------------------------------------
+    # WINDOWS AND APPLICATIONS DIRECTIONS
+    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    # Launch the application matching the string given in the first argument.
+    # If the options hash is given, it should contain the co-ordinates for
+    # the window.
+    #
+    # Example:
+    #
+    #   launch "Firefox", at(10, 10, 800, 600)
+    #
+    def launch(app_name, *options)
+      not_supported('launch')
+    end
+
+    alias :activate :launch
+
+
+    # Returns a region hash describing the entire screen area.
+    #
+    # Should return a hash with :width & :height keys.
+    #
+    def screen_size
+      not_supported('screen_size')
+    end
+
+
+    #--------------------------------------------------------------------------
+    # USEFUL UTILITIES
+    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    # Use text-to-speech functionality to emulate a human
+    # voice saying the narrative text.
+    #
+    def say(narrative)
+      compatible_call :say, narrative
+    end
+
+
     protected
-
-      # Returns an instance of the compatibility layer for the current
-      # operating system.
-      #
-      # Checks each class defined in the <gem_dir>/lib/castanaut/compatibility
-      # directory by running the version_check method.
-      #
-      # If you're working to make Castanaut compatible with your operating system,
-      # make sure YouCompatibilityLayer.version_check returns true on computers
-      # running the appropraite OS.
-      #
-      def compatibility_version
-        return @compatibility_version if @compatibility_version
-
-        Find.find(File.join(LIBPATH, "castanaut", "compatibility")) do |path|
-          path = path.match(/([^\/]*).rb$/)
-          next unless path
-          path = path[1]
-
-          # copied stright from the Rails camelize helper
-          path = path.to_s.gsub(/\/(.?)/) { "::" + $1.upcase }.gsub(/(^|_)(.)/) { $2.upcase }
-
-          begin
-            @compatibility_version = Object.module_eval("Castanaut::Compatibility::#{ path }")
-            raise 'wrong version' unless @compatibility_version.version_check
-            @compatibility_version = @compatibility_version.new(self)
-          rescue
-            @compatibility_version = nil
-          end
-
-          break if @compatibility_version
-        end
-        @compatibility_version
-      end
-
-
-      # The bread & butter of Castanaut's cross-OS compatibility.
-      #
-      def compatible_call(method, *options)
-        compatibility_version.send(method, *options)
-      rescue NameError
-        not_supported "the \"#{method}\" action"
-      end
-
 
       # Find a file relative to the movie execution context -- that is,
       # either the location of the screenplay file, or the present working
@@ -430,10 +439,14 @@ module Castanaut
       # Example:
       #   # On a Mac OS 10.5 (Leopard) machine
       #   hit 'a', Castanaut::Command
-      #   # => "Warning: Mac OS 10.5 (Leopard) doesn't support modifier keys for the 'hit' method."
+      #   => "Mac OS 10.5 (Leopard) does not support modifier keys for
+      #     the 'hit' method."
       #
       def not_supported(message)
-        raise Castanaut::Exceptions::NotSupportedError.new("Warning: #{ compatibility_version.to_s } doesn't support #{ message.gsub(/\.$/, '') }.")
+        message.gsub!(/\.$/, '')
+        raise Castanaut::Exceptions::NotSupportedError.new(
+          "#{self.class.to_s} does not support #{message}."
+        )
       end
 
 
@@ -455,8 +468,6 @@ module Castanaut
       end
 
 
-    private
-
       def apply_offset(options)
         return unless options[:to] && options[:offset]
         options[:to][:left] += options[:offset][:x] || 0
@@ -467,15 +478,6 @@ module Castanaut
       def roll_credits
         return unless @end_credits && @end_credits.any?
         @end_credits.each {|credit| credit.call}
-      end
-
-
-      # If a method isn't defined in the movie class, try doing a compatible_call.
-      # This is the magic that allows methods like the execute_applescript to work
-      # on Mac OS systems.
-      #
-      def method_missing(*args)
-        compatible_call(*args)
       end
 
   end
