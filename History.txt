@@ -1,3 +1,7 @@
+== 1.1.0 / ???
+
+* Replaced the gem/rubyforge packaging cruft with a gemspec and rake task.
+
 == 1.0.0 / 2008-02-21
 
 * Initial release.
