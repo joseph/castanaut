@@ -4,7 +4,7 @@ PageLoadTime = 2.5
 
 plugin 'safari'
 
-pause 0.5 
+pause 0.5
 launch "safari", at(64, 64, 1024, 768)
 url "about:blank"
 
