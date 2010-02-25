@@ -1,0 +1,20 @@
+#!/usr/bin/env castanaut
+
+# A script for screencasting. Requires LaunchBar (http://obdev.at/products/launchbar/beta.html).
+# Starts recording with iShowU, displays a title, hides all other apps.
+#
+# Author: Geoffrey Grosenbach
+#         March 27, 2009
+
+plugin "ishowu"
+
+ishowu_start_recording(:auto_stop => false)
+
+execute_applescript(<<EOL)
+tell application "LaunchBar"
+	display in large type "#{ARGV.join(' ')}" using font named "Futura Condensed Medium"
+	delay 3
+	hide
+end tell
+EOL
+

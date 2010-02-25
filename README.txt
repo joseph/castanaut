@@ -109,9 +109,12 @@ and verbose. Plugins allow you to extend the available dictionary with
 some additional convenience actions. Typically a plugin is specific to an
 application.
 
-Castanaut comes with several plugins, including Castanaut::Plugin::Safari for
-interacting with the contents of web-pages, and Castanaut::Plugin::Ishowu for
-recording screencasts using the iShowU application from Shiny White Box.
+Castanaut comes with several plugins, including 
+
+* Castanaut::Plugin::Safari for interacting with the contents of web-pages
+* Castanaut::Plugin::Ishowu for recording screencasts using the iShowU 
+  application from Shiny White Box. 
+* Castanaut::Plugin::Textmate for opening files to specific line numbers.
 
 To use a plugin, simply declare it:
 

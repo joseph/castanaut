@@ -20,9 +20,9 @@ module Castanaut
       # Open a URL in the front Safari tab.
       def url(str)
         execute_applescript(%Q`
-          tell application "safari" 
-            do JavaScript "location.href = '#{str}'" in front document 
-          end tell
+        tell application "safari"
+        do JavaScript "location.href = '#{str}'" in front document
+        end tell
         `)
       end
 
@@ -33,8 +33,12 @@ module Castanaut
       # Options include:
       # * :timeout - maximum number of seconds to wait for the element to
       #   appear. Defaults to 10.
-      # * :index - an integer (*n*) that gets the *n*th element matching the 
+      # * :index - an integer (*n*) that gets the *n*th element matching the
       #   selector. Defaults to the first element.
+      #    appear. Defaults to 10.
+      # * :index - an integer (*n*) that gets the *n*th element matching the
+      #    selector. Defaults to the first element.
+      #
       def wait_for_element(selector, options = {})
         timeout = Time.now.to_i + (options[:timeout] || 10).to_i
         while true
@@ -52,10 +56,10 @@ module Castanaut
       # with Castanaut::Movie#cursor to send the mouse cursor to the element.
       #
       # Options include:
-      # * :index - an integer (*n*) that gets the *n*th element matching the 
+      # * :index - an integer (*n*) that gets the *n*th element matching the
       #   selector. Defaults to the first element.
-      # * :area - whereabouts in the element do you want the coordinates. 
-      #   Valid values are: left, center, right, and top, middle, bottom. 
+      # * :area - whereabouts in the element do you want the coordinates.
+      #   Valid values are: left, center, right, and top, middle, bottom.
       #   Defaults to ["center", "middle"].
       #   If single axis is given (eg "left"), the other axis uses its default.
       # * :timeout - maximum number of seconds to wait for the element to appear.
@@ -75,30 +79,31 @@ module Castanaut
           x_axis = p.to_sym if %w[left center right].include?(p)
           y_axis = p.to_sym if %w[top middle bottom].include?(p)
         end
-        
+
         edge_offset = options[:edge_offset] || 3
         case x_axis
-          when :left
-            x = coords[0] + edge_offset
-          when :center
-            x = (coords[0] + coords[2] * 0.5).to_i 
-          when :right
-            x = (coords[0] + coords[2]) - edge_offset
+        when :left
+          x = coords[0] + edge_offset
+        when :center
+          x = (coords[0] + coords[2] * 0.5).to_i
+        when :right
+          x = (coords[0] + coords[2]) - edge_offset
         end
 
         case y_axis
-          when :top
-            y = coords[1] + edge_offset
-          when :middle
-            y = (coords[1] + coords[3] * 0.5).to_i
-          when :bottom
-            y = (coords[1] + coords[3]) - edge_offset
+        when :top
+          y = coords[1] + edge_offset
+        when :middle
+          y = (coords[1] + coords[3] * 0.5).to_i
+        when :bottom
+          y = (coords[1] + coords[3]) - edge_offset
         end
 
         result = { :to => { :left => x, :top => y } }
       end
 
       private
+
         # Note: the script should set the Castanaut.result variable.
         def execute_javascript(scpt)
           execute_applescript %Q`
@@ -146,7 +151,7 @@ module Castanaut
         end
 
     end
-  end 
+  end
 
   module Exceptions
     # When getting an element's coordinates, this is raised if no element on
