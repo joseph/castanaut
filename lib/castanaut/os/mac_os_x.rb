@@ -299,7 +299,7 @@ module Castanaut; module OS; module MacOSX
 
       def automatically(cmd)
         perms_test
-        run("#{osxautomation_path} \"#{cmd}\"")
+        run("\"#{osxautomation_path}\" \"#{cmd}\"")
       end
 
 

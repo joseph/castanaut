@@ -23,13 +23,12 @@ pause PageLoadTime
 say "Oh. I was hoping for more results."
 
 move to(340, 100)
-keystroke "l", "command"
 tripleclick
 pause 0.5
 type "http://inventivelabs.com.au"
 hit Enter
 
-pause 3
+pause 4
 
 move to_element("#switch")
 click
