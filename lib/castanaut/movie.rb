@@ -89,8 +89,6 @@ module Castanaut
       compatible_call :launch, app_name, options
     end
 
-    alias :activate, :launch
-
 
     # Returns a region hash describing the entire screen area.
     #

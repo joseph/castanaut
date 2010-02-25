@@ -1,6 +1,7 @@
 #!/usr/bin/env castanaut
 
-# A script for screencasting. Requires LaunchBar (http://obdev.at/products/launchbar/beta.html).
+# A script for screencasting.
+# Requires LaunchBar (http://obdev.at/products/launchbar/beta.html).
 # Starts recording with iShowU, displays a title, hides all other apps.
 #
 # Author: Geoffrey Grosenbach
@@ -17,4 +18,3 @@ tell application "LaunchBar"
 	hide
 end tell
 EOL
-
