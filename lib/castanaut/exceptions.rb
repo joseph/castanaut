@@ -1,7 +1,7 @@
 module Castanaut
   # All Castanaut errors are defined within this module. If you are creating
-  # a plugin, you should re-open this module in your plugin script file to 
-  # add any plugin-specific exceptions (it's also a good idea to have them 
+  # a plugin, you should re-open this module in your plugin script file to
+  # add any plugin-specific exceptions (it's also a good idea to have them
   # descend from CastanautError).
   module Exceptions
     # The abstract parent class of all Castanaut errors.
@@ -13,7 +13,7 @@ module Castanaut
     class ScreenplayNotFound < CastanautError
     end
 
-    # If Castanaut::Movie#run sees a non-zero exit status from the shell 
+    # If Castanaut::Movie#run sees a non-zero exit status from the shell
     # process, this error will be raised.
     class ExternalActionError < CastanautError
     end
@@ -33,5 +33,11 @@ module Castanaut
     # not supported by the current operating system.
     class NotSupportedError < CastanautError
     end
+
+    # Allows you to skip the rest of a perform block (therefore usually
+    # raised if some condition fails). See Movie#skip for the shorthand.
+    class SkipError < CastanautError
+    end
+
   end
 end

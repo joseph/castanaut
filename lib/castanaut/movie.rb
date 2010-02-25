@@ -2,8 +2,6 @@ require 'find'
 
 module Castanaut
 
-  class SkipError < StandardError; end
-
   # The movie class is the containing context within which screenplays are
   # invoked. It provides a number of basic stage directions for your
   # screenplays, and can be extended with plugins.
@@ -212,67 +210,9 @@ module Castanaut
       compatible_call :say, narrative
     end
 
-    ##
-    # Click a menu item in any application.
-    #
-    # The name of the application should be the first argument.
-    #
-    # Three dots will be automatically replaced by the appropriate ellipsis.
-    #
-    #   click_menu_item("TextMate", "Navigation", "Go to Symbol...")
 
-    def click_menu_item(*items)
-      items_as_applescript_array = items.map {|i| i.gsub!('...', "…"); %("#{i}")}.join(", ")
-      ascript = %Q(
-      -- menu_click, by Jacob Rus, September 2006
-      -- http://www.macosxhints.com/article.php?story=20060921045743404
-      --
-      -- Accepts a list of form: `{"Finder", "View", "Arrange By", "Date"}`
-      -- Execute the specified menu item.  In this case, assuming the Finder
-      -- is the active application, arranging the frontmost folder by date.
-
-      on menu_click(mList)
-      	local appName, topMenu, r
-
-      	-- Validate our input
-      	if mList's length < 3 then error "Menu list is not long enough"
-
-      	-- Set these variables for clarity and brevity later on
-      	set {appName, topMenu} to (items 1 through 2 of mList)
-      	set r to (items 3 through (mList's length) of mList)
-
-      	-- This overly-long line calls the menu_recurse function with
-      	-- two arguments: r, and a reference to the top-level menu
-      	tell application "System Events" to my menu_click_recurse(r, ((process appName)'s ¬
-      		(menu bar 1)'s (menu bar item topMenu)'s (menu topMenu)))
-      end menu_click
-
-      on menu_click_recurse(mList, parentObject)
-      	local f, r
-
-      	-- `f` = first item, `r` = rest of items
-      	set f to item 1 of mList
-      	if mList's length > 1 then set r to (items 2 through (mList's length) of mList)
-
-      	-- either actually click the menu item, or recurse again
-      	tell application "System Events"
-      		if mList's length is 1 then
-      			click parentObject's menu item f
-      		else
-      			my menu_click_recurse(r, (parentObject's (menu item f)'s (menu f)))
-      		end if
-      	end tell
-      end menu_click_recurse
-
-
-      menu_click({#{items_as_applescript_array}})
-      )
-      execute_applescript(ascript)
-    end
-
-
-    ##
-    # Convenience method for grouping things into labeled blocks.
+    # Groups directions into labelled blocks. This lets you skip (see below)
+    # to the end of the block if you need to.
     #
     #   perform "Build CouchDB from source" do
     #     launch "Terminal"
@@ -280,40 +220,29 @@ module Castanaut
     #     hit Enter
     #     ...
     #   end
-
+    #
     def perform(label)
       yield
-    rescue Castanaut::SkipError => e
-      puts "Skipping #{label}"
+    rescue Castanaut::Exceptions::SkipError => e
+      puts "Skipping remaining directions in '#{label}'"
     end
 
+
+    # Lets you skip out of a perform block if you need to. Usually raised
+    # when some condition fails. For example:
+    #
+    # perform "Point to heading" do
+    #
+    #   move to_element('h2') rescue skip
+    #   say "This is the heading."
+    #
+    # end
+    #
     def skip
-      raise Castanaut::SkipError
+      raise Castanaut::Exceptions::SkipError
     end
 
-    ##
-    # Hit a command key combo toward the currently active application.
-    #
-    # Use any combination of "command", "option", "control", "shift".
-    # ("command" is the default).
-    #
-    # Case matters! It's easiest to use lowercase, then "shift" if needed.
-    #
-    #   keystroke "t"                     # COMMAND-t
-    #   keystroke "k", "control", "shift" # A combo
 
-    def keystroke(character, *special_keys)
-      special_keys = ["command"] if special_keys.length == 0
-      special_keys_as_applescript_array = special_keys.map {|k| "#{k} down"}.join(", ")
-      execute_applescript(%Q'
-    	  tell application "System Events"
-          set frontApp to name of first item of (processes whose frontmost is true)
-          tell application frontApp
-    		    keystroke "#{character}" using {#{special_keys_as_applescript_array}}
-  		    end
-    	  end tell
-      ')
-    end
 
     # Starts saying the narrative text, and simultaneously begins executing
     # the given block. Waits until both are finished.
@@ -554,7 +483,6 @@ module Castanaut
       #
       def method_missing(*args)
         compatible_call(*args)
-      rescue
       end
 
   end

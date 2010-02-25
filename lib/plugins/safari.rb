@@ -45,9 +45,9 @@ module Castanaut
           begin
             coords = element_coordinates(selector, options)
             return coords unless coords.nil?
-          rescue Castanaut::Exceptions::ElementNotFound
+          rescue Castanaut::Exceptions::ElementNotFound > e
+            raise e if Time.now.to_i > timeout
           end
-          raise Castanaut::Exceptions::ElementNotFound if Time.now.to_i > timeout
           sleep 0.3
         end
       end
