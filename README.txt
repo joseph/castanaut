@@ -86,7 +86,7 @@ You can now run Castanaut interactively from IRB — to test commands, try stuff
 out, etc:
 
     $ irb -r 'castanaut'
-    >> irb Castanaut::Movie.new
+    >> irb Castanaut::Movie.spawn
     >> move to(100, 100)
     => "Moving mouse.\n"
 

@@ -1,4 +1,4 @@
-== 1.1.0 / ???
+== 1.1.0 / 2010-02-26
 
 * Replaced the gem/rubyforge packaging cruft with a gemspec and rake task.
 * IRB support (see README). [metavida / joseph]
