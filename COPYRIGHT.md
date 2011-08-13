@@ -1,4 +1,4 @@
-== Castanaut
+### Castanaut
 
 Copyright (C) 2008 Inventive Labs.
 
@@ -8,7 +8,7 @@ and/or modify it under the terms of the Do What The Fuck You Want
 To Public License, Version 2, as published by Sam Hocevar. See
 http://sam.zoy.org/wtfpl/COPYING for more details.
 
-=== DomQuery
+### DomQuery
 
 The DomQuery implementation is included from the Ext JS distribution, which
 uses the MIT license requiring the following copyright and permission 
