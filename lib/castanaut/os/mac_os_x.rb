@@ -19,7 +19,7 @@ module Castanaut; module OS; module MacOSX
     # Returns true if the current platform is Mac OS X 10.5 or greater.
     #
     def self.platform_supported?
-      vers = `/usr/bin/sw_vers -productVersion`.match(/10\.(\d)\.\d+/)
+      vers = `/usr/bin/sw_vers -productVersion`.match(/10\.(\d)/)
       vers[1].to_i >= 5
     rescue
       false

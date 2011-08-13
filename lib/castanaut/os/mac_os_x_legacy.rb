@@ -21,10 +21,10 @@ module Castanaut; module OS; module MacOSX
     register("Mac OS X 10.4")
 
 
-    # Returns true if the current platform is Mac OS X 10.5 or greater.
+    # Returns true if the current platform is Mac OS X 10.4.
     #
     def self.platform_supported?
-      vers = `/usr/bin/sw_vers -productVersion`.match(/10\.(\d)\.\d+/)
+      vers = `/usr/bin/sw_vers -productVersion`.match(/10\.(\d)/)
       vers[1].to_i == 4
     rescue
       false
