@@ -1,3 +1,7 @@
+== 1.1.1 / 2011-08-13
+
+* Now supports Mac OS X 10.7 (Lion).
+
 == 1.1.0 / 2010-02-26
 
 * Replaced the gem/rubyforge packaging cruft with a gemspec and rake task.

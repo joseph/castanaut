@@ -10,7 +10,7 @@ unless defined? Castanaut
   module Castanaut
 
     # :stopdoc:
-    VERSION = '1.1.0'
+    VERSION = '1.1.1'
     LIBPATH = ::File.expand_path(::File.dirname(__FILE__)) + ::File::SEPARATOR
     PATH = ::File.dirname(LIBPATH) + ::File::SEPARATOR
 

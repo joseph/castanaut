@@ -10,6 +10,7 @@ spec = Gem::Specification.new do |s|
   s.author = "Joseph Pearson"
   s.email = "joseph@inventivelabs.com.au"
   s.homepage = "http://gadgets.inventivelabs.com.au/castanaut"
+  s.rubyforge_project = "nowarning"
   s.files = Dir['*.txt'] +
     Dir['bin/*'] +
     Dir['cbin/*'] +
@@ -24,4 +25,5 @@ spec = Gem::Specification.new do |s|
     '--title', 'Castanaut',
     '--main', 'README.txt'
   ]
+  s.add_development_dependency("rake")
 end

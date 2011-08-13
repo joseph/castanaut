@@ -1,4 +1,3 @@
-require 'rake/gempackagetask'
 require 'rake/testtask'
 
 task :default => :test
