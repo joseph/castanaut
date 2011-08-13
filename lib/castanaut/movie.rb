@@ -122,7 +122,7 @@ module Castanaut
     def perform(label)
       yield
     rescue Castanaut::Exceptions::SkipError => e
-      puts "Skipping remaining directions in '#{label}'"
+      puts "Skipping remaining directions in '#{label}'"  unless e.quiet?
     end
 
 
@@ -136,8 +136,13 @@ module Castanaut
     #
     # end
     #
-    def skip
-      raise Castanaut::Exceptions::SkipError
+    # Options:
+    #
+    #   :quiet - does not print message about the skip to STDOUT.
+    #
+    #
+    def skip(options = {})
+      raise Castanaut::Exceptions::SkipError.new(options)
     end
 
 

@@ -48,7 +48,7 @@ class MovieTest < Test::Unit::TestCase
     x = 1
     mov.perform("Something") {
       x = 3
-      mov.skip
+      mov.skip(:quiet => true)
       x = 4
     }
     assert_equal(3, x)

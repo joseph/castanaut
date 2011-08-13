@@ -37,6 +37,13 @@ module Castanaut
     # Allows you to skip the rest of a perform block (therefore usually
     # raised if some condition fails). See Movie#skip for the shorthand.
     class SkipError < CastanautError
+      def initialize(options = {})
+        @quiet = true  if options[:quiet]
+      end
+
+      def quiet?
+        @quiet ? true : false
+      end
     end
 
   end
