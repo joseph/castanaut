@@ -2,7 +2,7 @@ module Castanaut
 
   module Plugin
     # This module provides actions for controlling Safari. It's tested against
-    # Safari 3 on Mac OS X 10.5.2.
+    # Safari 5.1.2 on Mac OS X 10.7.2.
     module Safari
 
       # An applescript fragment by the Movie launch method to determine
@@ -19,11 +19,7 @@ module Castanaut
 
       # Open a URL in the front Safari tab.
       def url(str)
-        execute_applescript(%Q`
-        tell application "safari"
-        do JavaScript "location.href = '#{str}'" in front document
-        end tell
-        `)
+        execute_javascript("location.href = '#{str}'");
       end
 
       # Sleep until the specified element appears on-screen. Use this if you
@@ -105,21 +101,14 @@ module Castanaut
 
       private
 
-        # Note: the script should set the Castanaut.result variable.
         def execute_javascript(scpt)
           execute_applescript %Q`
             tell application "Safari"
-              do JavaScript "
-                document.oldTitle = document.title;
-                #{escape_dq(scpt)}
-                if (typeof Castanaut.result != 'undefined') {
-                  document.title = Castanaut.result;
-                }
-              " in front document
-              set the_result to ((name of window 1) as string)
-              do JavaScript "
-                document.title = document.oldTitle;
-              " in front document
+              set the_result to (do JavaScript "
+                (function() {
+                  #{escape_dq(scpt)}
+                })();
+              " in front document)
               return the_result
             end tell
           `
@@ -132,7 +121,7 @@ module Castanaut
           coords = execute_javascript(%Q`
             #{gebys}
             #{cjs}
-            Castanaut.result = Castanaut.Coords.forElement(
+            return Castanaut.Coords.forElement(
               '#{selector}',
               #{index}
             );
