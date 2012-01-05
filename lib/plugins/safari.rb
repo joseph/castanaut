@@ -21,6 +21,25 @@ module Castanaut
       def url(str)
         execute_javascript("location.href = '#{str}'");
       end
+      
+      # Create a new tab in the front Safari window.
+      def new_tab(str = nil)
+        if str.nil?
+          execute_applescript %Q`
+            tell front window of application "Safari"
+                set the current tab to (make new tab)
+            end tell
+          `
+        else
+          execute_applescript %Q`
+            tell front window of application "Safari"
+                set newTab to make new tab
+                set the URL of newTab to "#{str}"
+                set the current tab to newTab
+            end tell
+          `
+        end
+      end
 
       # Sleep until the specified element appears on-screen. Use this if you
       # want to wait until the a page or AJAX request has finished loading
