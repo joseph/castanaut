@@ -1,4 +1,5 @@
-$:.unshift('lib')  unless $:.include?('lib')
+lib = File.expand_path('../lib/', __FILE__)
+$:.unshift lib unless $:.include?(lib)
 
 require 'castanaut'
 
@@ -19,7 +20,7 @@ spec = Gem::Specification.new do |s|
     Dir['test/**/*.rb']
   s.executables = ["castanaut"]
   s.require_path = 'lib'
-  s.has_rdoc = true
+  #s.has_rdoc = true
   s.extra_rdoc_files = Dir['*.md']
   s.rdoc_options += [
     '--title', 'Castanaut',

@@ -1,3 +1,8 @@
+### 1.1.2 / 2012-01-10
+
+* Safari 5 support, including adding tabs [DouweM]
+* Updated gem build practices [joseph]
+
 ### 1.1.1 / 2011-08-13
 
 * Now supports Mac OS X 10.7 (Lion).
